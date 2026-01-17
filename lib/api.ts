@@ -223,6 +223,7 @@ export const deviceApi = {
    */
   _controlDevice: async (farmId: string, endpoint: string, params: Record<string, any>) => {
     // 토큰과 Farm-Id 가져오기
+    const token = typeof window !== 'undefined' ? localStorage.getItem('cubeToken') : null;
     const currentFarm = typeof window !== 'undefined' ? localStorage.getItem('currentFarm') : null;
 
     // 파라미터를 URLSearchParams로 변환
@@ -238,6 +239,11 @@ export const deviceApi = {
     // Basic Auth 인코딩
     const basicAuth = btoa('cube-farm:nthing_dkaghdi00');
 
+    // 원본 CubeOS와 동일하게 Bearer 토큰 + Basic Auth 조합
+    const authHeader = token
+      ? `Bearer ${token}, Basic ${basicAuth}`
+      : `Basic ${basicAuth}`;
+
     console.log('[Device Control] URL:', url);
     console.log('[Device Control] Farm-Id:', currentFarm);
     console.log('[Device Control] Params:', Object.fromEntries(urlParams));
@@ -246,7 +252,7 @@ export const deviceApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${basicAuth}`,
+        'Authorization': authHeader,
         ...(currentFarm && { 'Farm-Id': currentFarm }),
       },
       body: urlParams.toString(),

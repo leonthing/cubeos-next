@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/lib/authStore';
 import { useMqtt } from '@/hooks/useMqtt';
-import { siteApi, gatewayApi, logApi } from '@/lib/api';
+import { siteApi, gatewayApi, logApi, deviceApi } from '@/lib/api';
 import Hls from 'hls.js';
 import {
   LineChart,
@@ -38,6 +38,7 @@ import {
   BarChart3,
   Video,
   X,
+  Loader2,
 } from 'lucide-react';
 
 // 센서 타입 정규화
@@ -104,6 +105,71 @@ export default function DashboardPage() {
     gateway: null,
     name: '',
   });
+  const [controlling, setControlling] = useState<string | null>(null);
+
+  // 장치 제어
+  const handleControl = async (device: any, newState: boolean) => {
+    const controlKey = `${device.did}-switch`;
+    setControlling(controlKey);
+
+    try {
+      const dtype = device.dtype?.toLowerCase() || 'switch';
+
+      switch (dtype) {
+        case 'led':
+          await deviceApi.ledControl(farmId, { did: device.did, switch: newState });
+          break;
+        case 'pump':
+          await deviceApi.pumpControl(farmId, { did: device.did, switch: newState });
+          break;
+        case 'ac':
+          await deviceApi.acControl(farmId, { did: device.did, switch: newState });
+          break;
+        default:
+          await deviceApi.switchControl(farmId, { did: device.did, switch: newState });
+      }
+
+      // UI 즉시 업데이트
+      setControllerGateways((prev) =>
+        prev.map((gw) => ({
+          ...gw,
+          deviceList: gw.deviceList.map((d: any) =>
+            d.did === device.did ? { ...d, status: newState ? 1 : 0 } : d
+          ),
+        }))
+      );
+    } catch (error) {
+      console.error('장치 제어 실패:', error);
+      alert('장치 제어에 실패했습니다.');
+    } finally {
+      setControlling(null);
+    }
+  };
+
+  // 자동/수동 모드 전환
+  const handleModeChange = async (device: any, auto: boolean) => {
+    const controlKey = `${device.did}-mode`;
+    setControlling(controlKey);
+
+    try {
+      await deviceApi.setAutoMode(farmId, { did: device.did, auto });
+
+      // UI 업데이트
+      setControllerGateways((prev) =>
+        prev.map((gw) => ({
+          ...gw,
+          deviceList: gw.deviceList.map((d: any) =>
+            d.did === device.did ? { ...d, mode: auto ? 'auto' : 'manual' } : d
+          ),
+        }))
+      );
+    } catch (error) {
+      console.error('모드 변경 실패:', error);
+      alert('모드 변경에 실패했습니다.');
+    } finally {
+      setControlling(null);
+    }
+  };
 
   // MQTT 연결
   const { isConnected } = useMqtt({
@@ -492,6 +558,8 @@ export default function DashboardPage() {
                           const Icon = config.icon;
                           const isOn = device.status === 1;
                           const isAuto = device.mode === 'auto';
+                          const isSwitchControlling = controlling === `${device.did}-switch`;
+                          const isModeControlling = controlling === `${device.did}-mode`;
 
                           return (
                             <div key={device.did} className="bg-gray-50 rounded-lg p-3">
@@ -504,20 +572,36 @@ export default function DashboardPage() {
                                   </span>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                  <div
-                                    className={`w-10 h-5 rounded-full relative ${
+                                  {/* ON/OFF 토글 */}
+                                  <button
+                                    onClick={() => handleControl(device, !isOn)}
+                                    disabled={isSwitchControlling}
+                                    className={`w-10 h-5 rounded-full relative transition-colors ${
                                       isOn ? 'bg-green-400' : 'bg-gray-300'
-                                    }`}
+                                    } ${isSwitchControlling ? 'opacity-50' : 'cursor-pointer hover:opacity-80'}`}
                                   >
-                                    <span
-                                      className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                                        isOn ? 'translate-x-5' : 'translate-x-0.5'
-                                      }`}
-                                    />
-                                  </div>
-                                  <span className="text-xs text-gray-500 w-12">
-                                    {isAuto ? 'Auto' : 'Manual'}
-                                  </span>
+                                    {isSwitchControlling ? (
+                                      <Loader2 className="w-3 h-3 text-white absolute top-1 left-1/2 -translate-x-1/2 animate-spin" />
+                                    ) : (
+                                      <span
+                                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                                          isOn ? 'translate-x-5' : 'translate-x-0.5'
+                                        }`}
+                                      />
+                                    )}
+                                  </button>
+                                  {/* Auto/Manual 토글 */}
+                                  <button
+                                    onClick={() => handleModeChange(device, !isAuto)}
+                                    disabled={isModeControlling}
+                                    className={`text-xs w-14 py-0.5 rounded ${
+                                      isAuto
+                                        ? 'bg-blue-100 text-blue-600'
+                                        : 'bg-gray-200 text-gray-600'
+                                    } ${isModeControlling ? 'opacity-50' : 'hover:opacity-80 cursor-pointer'}`}
+                                  >
+                                    {isModeControlling ? '...' : isAuto ? 'Auto' : 'Manual'}
+                                  </button>
                                 </div>
                               </div>
 

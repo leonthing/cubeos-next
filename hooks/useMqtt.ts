@@ -10,7 +10,7 @@ import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 
 // MQTT 브로커 설정
 const MQTT_HOST = process.env.NEXT_PUBLIC_MQTT_HOST || 'wss://hamqtt.nthing.link:8084/mqtt';
-const MQTT_ENABLED = process.env.NEXT_PUBLIC_MQTT_ENABLED !== 'false'; // 기본값: 활성화
+const MQTT_ENABLED = process.env.NEXT_PUBLIC_MQTT_ENABLED === 'true'; // 기본값: 비활성화
 
 /**
  * MQTT 메시지 타입

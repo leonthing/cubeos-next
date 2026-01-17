@@ -108,25 +108,32 @@ export default function DashboardPage() {
   const [controlling, setControlling] = useState<string | null>(null);
 
   // 장치 제어
-  const handleControl = async (device: any, newState: boolean) => {
+  const handleControl = async (gateway: any, device: any, newState: boolean) => {
     const controlKey = `${device.did}-switch`;
     setControlling(controlKey);
 
     try {
       const dtype = device.dtype?.toLowerCase() || 'switch';
+      const controlData = {
+        gid: gateway.gid,
+        did: device.did,
+        num: device.num,
+        command: newState,
+        dtype: device.dtype,
+      };
 
       switch (dtype) {
         case 'led':
-          await deviceApi.ledControl(farmId, { did: device.did, switch: newState });
+          await deviceApi.ledControl(farmId, controlData);
           break;
         case 'pump':
-          await deviceApi.pumpControl(farmId, { did: device.did, switch: newState });
+          await deviceApi.pumpControl(farmId, controlData);
           break;
         case 'ac':
-          await deviceApi.acControl(farmId, { did: device.did, switch: newState });
+          await deviceApi.acControl(farmId, controlData);
           break;
         default:
-          await deviceApi.switchControl(farmId, { did: device.did, switch: newState });
+          await deviceApi.switchControl(farmId, controlData);
       }
 
       // UI 즉시 업데이트
@@ -147,12 +154,17 @@ export default function DashboardPage() {
   };
 
   // 자동/수동 모드 전환
-  const handleModeChange = async (device: any, auto: boolean) => {
+  const handleModeChange = async (gateway: any, device: any, auto: boolean) => {
     const controlKey = `${device.did}-mode`;
     setControlling(controlKey);
 
     try {
-      await deviceApi.setAutoMode(farmId, { did: device.did, auto });
+      await deviceApi.setAutoMode(farmId, {
+        gid: gateway.gid,
+        did: device.did,
+        num: device.num,
+        auto,
+      });
 
       // UI 업데이트
       setControllerGateways((prev) =>
@@ -574,7 +586,7 @@ export default function DashboardPage() {
                                 <div className="flex items-center space-x-2">
                                   {/* ON/OFF 토글 */}
                                   <button
-                                    onClick={() => handleControl(device, !isOn)}
+                                    onClick={() => handleControl(gateway, device, !isOn)}
                                     disabled={isSwitchControlling}
                                     className={`w-10 h-5 rounded-full relative transition-colors ${
                                       isOn ? 'bg-green-400' : 'bg-gray-300'
@@ -592,7 +604,7 @@ export default function DashboardPage() {
                                   </button>
                                   {/* Auto/Manual 토글 */}
                                   <button
-                                    onClick={() => handleModeChange(device, !isAuto)}
+                                    onClick={() => handleModeChange(gateway, device, !isAuto)}
                                     disabled={isModeControlling}
                                     className={`text-xs w-14 py-0.5 rounded ${
                                       isAuto

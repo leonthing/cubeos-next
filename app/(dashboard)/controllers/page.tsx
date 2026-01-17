@@ -116,25 +116,32 @@ export default function ControllersPage() {
   );
 
   // 장치 제어
-  const handleControl = async (device: any, newState: boolean) => {
+  const handleControl = async (gateway: any, device: any, newState: boolean) => {
     const controlKey = `${device.did}-switch`;
     setControlling(controlKey);
 
     try {
       const dtype = device.dtype?.toLowerCase() || 'switch';
+      const controlData = {
+        gid: gateway.gid,
+        did: device.did,
+        num: device.num,
+        command: newState,
+        dtype: device.dtype,
+      };
 
       switch (dtype) {
         case 'led':
-          await deviceApi.ledControl(farmId, { did: device.did, switch: newState });
+          await deviceApi.ledControl(farmId, controlData);
           break;
         case 'pump':
-          await deviceApi.pumpControl(farmId, { did: device.did, switch: newState });
+          await deviceApi.pumpControl(farmId, controlData);
           break;
         case 'ac':
-          await deviceApi.acControl(farmId, { did: device.did, switch: newState });
+          await deviceApi.acControl(farmId, controlData);
           break;
         default:
-          await deviceApi.switchControl(farmId, { did: device.did, switch: newState });
+          await deviceApi.switchControl(farmId, controlData);
       }
 
       // 즉시 UI 업데이트
@@ -155,12 +162,17 @@ export default function ControllersPage() {
   };
 
   // 자동/수동 모드 전환
-  const handleModeChange = async (device: any, auto: boolean) => {
+  const handleModeChange = async (gateway: any, device: any, auto: boolean) => {
     const controlKey = `${device.did}-mode`;
     setControlling(controlKey);
 
     try {
-      await deviceApi.setAutoMode(farmId, { did: device.did, auto });
+      await deviceApi.setAutoMode(farmId, {
+        gid: gateway.gid,
+        did: device.did,
+        num: device.num,
+        auto,
+      });
 
       // UI 업데이트
       setControllerGateways((prev) =>
@@ -337,7 +349,7 @@ export default function ControllersPage() {
                           <div className="flex items-center space-x-3">
                             {/* ON/OFF 토글 */}
                             <button
-                              onClick={() => handleControl(device, !isOn)}
+                              onClick={() => handleControl(gateway, device, !isOn)}
                               disabled={isSwitchControlling}
                               className={`relative w-12 h-6 rounded-full transition-colors ${
                                 isOn ? 'bg-green-500' : 'bg-gray-300'

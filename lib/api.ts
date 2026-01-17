@@ -219,13 +219,27 @@ export const deviceApi = {
   /**
    * LED 제어
    */
-  ledControl: async (farmId: string, data: { did: string; switch: boolean; brightness?: number }) => {
+  ledControl: async (farmId: string, data: {
+    gid: string;
+    did: string;
+    num: number;
+    command: boolean;
+    dtype?: string;
+    ontime?: number;
+    offtime?: number;
+    auto?: boolean;
+    coupling?: boolean;
+  }) => {
     const params = new URLSearchParams();
+    params.append('gid', data.gid);
     params.append('did', data.did);
-    params.append('switch', String(data.switch));
-    if (data.brightness !== undefined) {
-      params.append('brightness', String(data.brightness));
-    }
+    params.append('num', String(data.num));
+    params.append('command', String(data.command));
+    if (data.dtype) params.append('dtype', data.dtype);
+    if (data.ontime !== undefined) params.append('ontime', String(data.ontime));
+    if (data.offtime !== undefined) params.append('offtime', String(data.offtime));
+    if (data.auto !== undefined) params.append('auto', String(data.auto));
+    if (data.coupling !== undefined) params.append('coupling', String(data.coupling));
 
     const response = await api.post(
       `/farm/${FARM_PATH}/device/ledControl`,
@@ -238,10 +252,19 @@ export const deviceApi = {
   /**
    * 펌프 제어
    */
-  pumpControl: async (farmId: string, data: { did: string; switch: boolean }) => {
+  pumpControl: async (farmId: string, data: {
+    gid: string;
+    did: string;
+    num: number;
+    command: boolean;
+    dtype?: string;
+  }) => {
     const params = new URLSearchParams();
+    params.append('gid', data.gid);
     params.append('did', data.did);
-    params.append('switch', String(data.switch));
+    params.append('num', String(data.num));
+    params.append('command', String(data.command));
+    if (data.dtype) params.append('dtype', data.dtype);
 
     const response = await api.post(
       `/farm/${FARM_PATH}/device/pumpControl`,
@@ -254,13 +277,21 @@ export const deviceApi = {
   /**
    * 에어컨 제어
    */
-  acControl: async (farmId: string, data: { did: string; switch: boolean; temp?: number }) => {
+  acControl: async (farmId: string, data: {
+    gid: string;
+    did: string;
+    num: number;
+    command: boolean;
+    dtype?: string;
+    temp?: number;
+  }) => {
     const params = new URLSearchParams();
+    params.append('gid', data.gid);
     params.append('did', data.did);
-    params.append('switch', String(data.switch));
-    if (data.temp !== undefined) {
-      params.append('temp', String(data.temp));
-    }
+    params.append('num', String(data.num));
+    params.append('command', String(data.command));
+    if (data.dtype) params.append('dtype', data.dtype);
+    if (data.temp !== undefined) params.append('temp', String(data.temp));
 
     const response = await api.post(
       `/farm/${FARM_PATH}/device/acControl`,
@@ -273,10 +304,19 @@ export const deviceApi = {
   /**
    * 범용 스위치 제어
    */
-  switchControl: async (farmId: string, data: { did: string; switch: boolean }) => {
+  switchControl: async (farmId: string, data: {
+    gid: string;
+    did: string;
+    num: number;
+    command: boolean;
+    dtype?: string;
+  }) => {
     const params = new URLSearchParams();
+    params.append('gid', data.gid);
     params.append('did', data.did);
-    params.append('switch', String(data.switch));
+    params.append('num', String(data.num));
+    params.append('command', String(data.command));
+    if (data.dtype) params.append('dtype', data.dtype);
 
     const response = await api.post(
       `/farm/${FARM_PATH}/device/switchControl`,
@@ -289,9 +329,16 @@ export const deviceApi = {
   /**
    * 자동/수동 모드 전환
    */
-  setAutoMode: async (farmId: string, data: { did: string; auto: boolean }) => {
+  setAutoMode: async (farmId: string, data: {
+    gid: string;
+    did: string;
+    num: number;
+    auto: boolean;
+  }) => {
     const params = new URLSearchParams();
+    params.append('gid', data.gid);
     params.append('did', data.did);
+    params.append('num', String(data.num));
     params.append('auto', String(data.auto));
 
     const response = await api.post(

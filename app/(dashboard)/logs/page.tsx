@@ -62,7 +62,7 @@ export default function LogsPage() {
 
       switch (logType) {
         case 'sensor':
-          response = await logApi.getSensorLogs({
+          response = await logApi.getSensorLogsPage({
             farmId,
             deviceId: deviceId || undefined,
             startDate,

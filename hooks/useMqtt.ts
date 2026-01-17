@@ -174,7 +174,7 @@ export function useMqtt(options: UseMqttOptions) {
       // WebSocket 옵션
       wsOptions: {
         protocols: ['mqtt'],  // Sec-WebSocket-Protocol 헤더
-      },
+      } as any,
     };
 
     // MQTT 연결

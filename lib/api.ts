@@ -232,10 +232,15 @@ export const deviceApi = {
     });
 
     // Next.js rewrites를 통한 프록시 사용
-    const url = `/api/proxy/farm/${farmId}/device/${endpoint}`;
+    // 읽기 API와 동일하게 'portal' 경로 사용, Farm-Id 헤더로 인증
+    const url = `/api/proxy/farm/portal/device/${endpoint}`;
 
     // Basic Auth 인코딩
     const basicAuth = btoa('cube-farm:nthing_dkaghdi00');
+
+    console.log('[Device Control] URL:', url);
+    console.log('[Device Control] Farm-Id:', currentFarm);
+    console.log('[Device Control] Params:', Object.fromEntries(urlParams));
 
     const response = await fetch(url, {
       method: 'POST',

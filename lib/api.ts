@@ -262,51 +262,8 @@ export const deviceApi = {
   },
 
   /**
-   * LED 제어
-   */
-  ledControl: async (farmId: string, data: {
-    gid: string;
-    did: string;
-    num: number;
-    command: boolean;
-    dtype?: string;
-    ontime?: number;
-    offtime?: number;
-    auto?: boolean;
-    coupling?: boolean;
-  }) => {
-    return deviceApi._controlDevice(farmId, 'ledControl', data);
-  },
-
-  /**
-   * 펌프 제어
-   */
-  pumpControl: async (farmId: string, data: {
-    gid: string;
-    did: string;
-    num: number;
-    command: boolean;
-    dtype?: string;
-  }) => {
-    return deviceApi._controlDevice(farmId, 'pumpControl', data);
-  },
-
-  /**
-   * 에어컨 제어
-   */
-  acControl: async (farmId: string, data: {
-    gid: string;
-    did: string;
-    num: number;
-    command: boolean;
-    dtype?: string;
-    temp?: number;
-  }) => {
-    return deviceApi._controlDevice(farmId, 'acControl', data);
-  },
-
-  /**
-   * 범용 스위치 제어
+   * 범용 스위치 제어 (LED, 펌프, 에어컨 등 모든 장치에 사용)
+   * 원본 CubeOS와 동일하게 switchControl 엔드포인트 사용
    */
   switchControl: async (farmId: string, data: {
     gid: string;

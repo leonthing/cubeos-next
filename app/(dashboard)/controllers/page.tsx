@@ -121,7 +121,6 @@ export default function ControllersPage() {
     setControlling(controlKey);
 
     try {
-      const dtype = device.dtype?.toLowerCase() || 'switch';
       const controlData = {
         gid: gateway.gid,
         did: device.did,
@@ -130,19 +129,8 @@ export default function ControllersPage() {
         dtype: device.dtype,
       };
 
-      switch (dtype) {
-        case 'led':
-          await deviceApi.ledControl(farmId, controlData);
-          break;
-        case 'pump':
-          await deviceApi.pumpControl(farmId, controlData);
-          break;
-        case 'ac':
-          await deviceApi.acControl(farmId, controlData);
-          break;
-        default:
-          await deviceApi.switchControl(farmId, controlData);
-      }
+      // 원본 CubeOS와 동일하게 모든 장치에 switchControl 사용
+      await deviceApi.switchControl(farmId, controlData);
 
       // 즉시 UI 업데이트
       setControllerGateways((prev) =>

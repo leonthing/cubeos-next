@@ -21,6 +21,16 @@ const nextConfig = {
     ];
   },
 
+  // API 프록시 - CORS 우회
+  async rewrites() {
+    return [
+      {
+        source: '/api/proxy/:path*',
+        destination: 'https://api.nthing.link:8080/:path*',
+      },
+    ];
+  },
+
 };
 
 module.exports = nextConfig;

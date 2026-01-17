@@ -219,24 +219,37 @@ export const deviceApi = {
   },
 
   /**
-   * 장치 제어 공통 함수 (서버사이드 프록시 사용)
+   * 장치 제어 공통 함수 (Next.js rewrites 프록시 사용)
    */
   _controlDevice: async (farmId: string, endpoint: string, params: Record<string, any>) => {
     // 토큰과 Farm-Id 가져오기
-    const token = typeof window !== 'undefined' ? localStorage.getItem('cubeToken') : null;
     const currentFarm = typeof window !== 'undefined' ? localStorage.getItem('currentFarm') : null;
 
-    const response = await fetch('/api/device/control', {
+    // 파라미터를 URLSearchParams로 변환
+    const urlParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      urlParams.append(key, String(value));
+    });
+
+    // Next.js rewrites를 통한 프록시 사용
+    const url = `/api/proxy/farm/${farmId}/device/${endpoint}`;
+
+    // Basic Auth 인코딩
+    const basicAuth = btoa('cube-farm:nthing_dkaghdi00');
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${basicAuth}`,
         ...(currentFarm && { 'Farm-Id': currentFarm }),
       },
-      body: JSON.stringify({ farmId, endpoint, params }),
+      body: urlParams.toString(),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Device Control] Error:', response.status, errorText);
       throw new Error(`Device control failed: ${response.status}`);
     }
 

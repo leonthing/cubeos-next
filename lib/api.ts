@@ -75,6 +75,9 @@ export const api = createApiClient();
 // 인증 API
 // ==================================================
 
+// 로그인은 프록시를 거치지 않고 직접 API 서버로 요청
+const AUTH_API_URL = 'https://api.nthing.link:8080';
+
 export const authApi = {
   /**
    * 로그인
@@ -86,7 +89,7 @@ export const authApi = {
     params.append('grant_type', 'password');
 
     const response = await axios.post(
-      `${API_URL}/auth/${API_ENV}/oauth/token`,
+      `${AUTH_API_URL}/auth/${API_ENV}/oauth/token`,
       params.toString(),
       {
         headers: {

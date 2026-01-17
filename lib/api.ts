@@ -219,6 +219,31 @@ export const deviceApi = {
   },
 
   /**
+   * 장치 제어 공통 함수 (서버사이드 프록시 사용)
+   */
+  _controlDevice: async (farmId: string, endpoint: string, params: Record<string, any>) => {
+    // 토큰과 Farm-Id 가져오기
+    const token = typeof window !== 'undefined' ? localStorage.getItem('cubeToken') : null;
+    const currentFarm = typeof window !== 'undefined' ? localStorage.getItem('currentFarm') : null;
+
+    const response = await fetch('/api/device/control', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...(currentFarm && { 'Farm-Id': currentFarm }),
+      },
+      body: JSON.stringify({ farmId, endpoint, params }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Device control failed: ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  /**
    * LED 제어
    */
   ledControl: async (farmId: string, data: {
@@ -232,23 +257,7 @@ export const deviceApi = {
     auto?: boolean;
     coupling?: boolean;
   }) => {
-    const params = new URLSearchParams();
-    params.append('gid', data.gid);
-    params.append('did', data.did);
-    params.append('num', String(data.num));
-    params.append('command', String(data.command));
-    if (data.dtype) params.append('dtype', data.dtype);
-    if (data.ontime !== undefined) params.append('ontime', String(data.ontime));
-    if (data.offtime !== undefined) params.append('offtime', String(data.offtime));
-    if (data.auto !== undefined) params.append('auto', String(data.auto));
-    if (data.coupling !== undefined) params.append('coupling', String(data.coupling));
-
-    const response = await api.post(
-      `/farm/${farmId}/device/ledControl`,
-      params.toString(),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-    return response.data;
+    return deviceApi._controlDevice(farmId, 'ledControl', data);
   },
 
   /**
@@ -261,19 +270,7 @@ export const deviceApi = {
     command: boolean;
     dtype?: string;
   }) => {
-    const params = new URLSearchParams();
-    params.append('gid', data.gid);
-    params.append('did', data.did);
-    params.append('num', String(data.num));
-    params.append('command', String(data.command));
-    if (data.dtype) params.append('dtype', data.dtype);
-
-    const response = await api.post(
-      `/farm/${farmId}/device/pumpControl`,
-      params.toString(),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-    return response.data;
+    return deviceApi._controlDevice(farmId, 'pumpControl', data);
   },
 
   /**
@@ -287,20 +284,7 @@ export const deviceApi = {
     dtype?: string;
     temp?: number;
   }) => {
-    const params = new URLSearchParams();
-    params.append('gid', data.gid);
-    params.append('did', data.did);
-    params.append('num', String(data.num));
-    params.append('command', String(data.command));
-    if (data.dtype) params.append('dtype', data.dtype);
-    if (data.temp !== undefined) params.append('temp', String(data.temp));
-
-    const response = await api.post(
-      `/farm/${farmId}/device/acControl`,
-      params.toString(),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-    return response.data;
+    return deviceApi._controlDevice(farmId, 'acControl', data);
   },
 
   /**
@@ -313,19 +297,7 @@ export const deviceApi = {
     command: boolean;
     dtype?: string;
   }) => {
-    const params = new URLSearchParams();
-    params.append('gid', data.gid);
-    params.append('did', data.did);
-    params.append('num', String(data.num));
-    params.append('command', String(data.command));
-    if (data.dtype) params.append('dtype', data.dtype);
-
-    const response = await api.post(
-      `/farm/${farmId}/device/switchControl`,
-      params.toString(),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-    return response.data;
+    return deviceApi._controlDevice(farmId, 'switchControl', data);
   },
 
   /**
@@ -337,18 +309,7 @@ export const deviceApi = {
     num: number;
     auto: boolean;
   }) => {
-    const params = new URLSearchParams();
-    params.append('gid', data.gid);
-    params.append('did', data.did);
-    params.append('num', String(data.num));
-    params.append('auto', String(data.auto));
-
-    const response = await api.post(
-      `/farm/${farmId}/device/autoControl`,
-      params.toString(),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-    return response.data;
+    return deviceApi._controlDevice(farmId, 'autoControl', data);
   },
 };
 

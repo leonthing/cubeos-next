@@ -6,10 +6,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 // 환경 변수에서 API 주소 가져오기
-// 브라우저에서는 프록시 사용, 서버에서는 직접 연결
-const API_URL = typeof window !== 'undefined'
-  ? '/api/proxy'  // 브라우저: Next.js 프록시 경로
-  : (process.env.NEXT_PUBLIC_API_URL || 'https://api.nthing.link:8080');
+// Vercel 배포 시 프록시가 작동하지 않아 직접 연결
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.nthing.link:8080';
 const API_ENV = process.env.NEXT_PUBLIC_API_ENV || 'production';
 
 // Farm API 경로 (기존 cubeOS는 'portal' 사용)

@@ -39,7 +39,9 @@ async function proxyRequest(request: NextRequest, path: string) {
   }
 
   try {
+    console.log(`[Proxy] ${request.method} ${url}`);
     const response = await fetch(url, fetchOptions);
+    console.log(`[Proxy] Response: ${response.status} ${response.statusText}`);
 
     // 응답 헤더 복사
     const responseHeaders = new Headers();
@@ -58,7 +60,7 @@ async function proxyRequest(request: NextRequest, path: string) {
       headers: responseHeaders,
     });
   } catch (error) {
-    console.error('Proxy error:', error);
+    console.error('[Proxy] Error:', error);
     return NextResponse.json(
       { error: 'Proxy request failed', details: String(error) },
       { status: 500 }

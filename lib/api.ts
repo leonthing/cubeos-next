@@ -10,7 +10,9 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.nthing.link:8080';
 const API_ENV = process.env.NEXT_PUBLIC_API_ENV || 'production';
 
-// Farm API 경로 (기존 cubeOS는 'portal' 사용)
+// Farm API 경로
+// 읽기 API는 'portal' 경로 사용 (Farm-Id 헤더로 필터링)
+// 장치 제어 API는 동적 farmId 경로 사용
 const FARM_PATH = 'portal';
 
 /**
@@ -242,7 +244,7 @@ export const deviceApi = {
     if (data.coupling !== undefined) params.append('coupling', String(data.coupling));
 
     const response = await api.post(
-      `/farm/${FARM_PATH}/device/ledControl`,
+      `/farm/${farmId}/device/ledControl`,
       params.toString(),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
@@ -267,7 +269,7 @@ export const deviceApi = {
     if (data.dtype) params.append('dtype', data.dtype);
 
     const response = await api.post(
-      `/farm/${FARM_PATH}/device/pumpControl`,
+      `/farm/${farmId}/device/pumpControl`,
       params.toString(),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
@@ -294,7 +296,7 @@ export const deviceApi = {
     if (data.temp !== undefined) params.append('temp', String(data.temp));
 
     const response = await api.post(
-      `/farm/${FARM_PATH}/device/acControl`,
+      `/farm/${farmId}/device/acControl`,
       params.toString(),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
@@ -319,7 +321,7 @@ export const deviceApi = {
     if (data.dtype) params.append('dtype', data.dtype);
 
     const response = await api.post(
-      `/farm/${FARM_PATH}/device/switchControl`,
+      `/farm/${farmId}/device/switchControl`,
       params.toString(),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
@@ -342,7 +344,7 @@ export const deviceApi = {
     params.append('auto', String(data.auto));
 
     const response = await api.post(
-      `/farm/${FARM_PATH}/device/autoControl`,
+      `/farm/${farmId}/device/autoControl`,
       params.toString(),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );

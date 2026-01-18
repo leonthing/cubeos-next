@@ -70,38 +70,42 @@ async function proxyRequest(request: NextRequest, path: string) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
+  const { path } = await params;
+  const pathStr = path.join('/');
   const searchParams = request.nextUrl.searchParams.toString();
-  const fullPath = searchParams ? `${path}?${searchParams}` : path;
+  const fullPath = searchParams ? `${pathStr}?${searchParams}` : pathStr;
   return proxyRequest(request, fullPath);
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
+  const { path } = await params;
+  const pathStr = path.join('/');
   const searchParams = request.nextUrl.searchParams.toString();
-  const fullPath = searchParams ? `${path}?${searchParams}` : path;
+  const fullPath = searchParams ? `${pathStr}?${searchParams}` : pathStr;
   return proxyRequest(request, fullPath);
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
-  return proxyRequest(request, path);
+  const { path } = await params;
+  const pathStr = path.join('/');
+  return proxyRequest(request, pathStr);
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
-  return proxyRequest(request, path);
+  const { path } = await params;
+  const pathStr = path.join('/');
+  return proxyRequest(request, pathStr);
 }
 
 export async function OPTIONS(request: NextRequest) {

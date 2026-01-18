@@ -1,6 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* ==================================================
+   cubeOS 테마 설정 (Tailwind CSS 4)
+   ================================================== */
+
+@theme {
+  /* cubeOS 브랜드 컬러 */
+  --color-cube-primary: #2563eb;
+  --color-cube-secondary: #10b981;
+  --color-cube-warning: #f59e0b;
+  --color-cube-danger: #ef4444;
+  --color-cube-dark: #1e293b;
+  --color-cube-light: #f8fafc;
+}
 
 /* ==================================================
    cubeOS 글로벌 스타일

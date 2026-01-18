@@ -2,7 +2,17 @@
 const nextConfig = {
   // 외부 이미지 도메인 허용
   images: {
-    domains: ['api.nthing.link'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.nthing.link',
+      },
+    ],
+  },
+
+  // Turbopack 루트 디렉토리 설정
+  turbopack: {
+    root: __dirname,
   },
 
   // 환경 변수

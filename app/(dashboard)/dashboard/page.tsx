@@ -417,11 +417,11 @@ export default function DashboardPage() {
             <div className="card mb-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <span className="font-bold text-blue-600 text-lg">{selectedSiteInfo.name}</span>
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span className="font-bold text-blue-600 text-lg">{selectedSiteInfo.name?.charAt(0) || 'S'}</span>
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">
+                    <h2 className="text-lg font-semibold text-gray-900 whitespace-nowrap">
                       {selectedSiteInfo.name} - {selectedSiteInfo.stype || 'WORKING'}
                     </h2>
                     <p className="text-sm text-gray-500">

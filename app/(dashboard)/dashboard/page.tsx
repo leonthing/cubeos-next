@@ -347,7 +347,7 @@ export default function DashboardPage() {
       {/* 데스크톱: 사이드바 사이트 목록 - 접기 가능 */}
       <div
         className={`hidden lg:flex flex-col bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0 transition-all duration-300 ${
-          sitesCollapsed ? 'w-12' : 'w-48'
+          sitesCollapsed ? 'w-14' : 'w-48'
         }`}
       >
         <div className={`p-2 ${sitesCollapsed ? '' : 'p-3'}`}>
@@ -382,7 +382,7 @@ export default function DashboardPage() {
                   onClick={() => setSelectedSite(site.sid)}
                   title={sitesCollapsed ? `${site.name} (${temp !== null ? `${temp.toFixed(1)}°C` : '--'})` : undefined}
                   className={`w-full text-left rounded-lg transition-colors ${
-                    sitesCollapsed ? 'p-2 flex items-center justify-center' : 'px-3 py-2.5'
+                    sitesCollapsed ? 'px-1.5 py-2 flex items-center justify-center' : 'px-3 py-2.5'
                   } ${
                     isSelected
                       ? 'bg-blue-100 text-blue-700'
@@ -390,7 +390,7 @@ export default function DashboardPage() {
                   }`}
                 >
                   {sitesCollapsed ? (
-                    <span className="font-bold text-xs">{site.name?.charAt(0) || 'S'}</span>
+                    <span className="font-bold text-[10px]">{site.name?.slice(0, 3) || 'S'}</span>
                   ) : (
                     <>
                       <div className="font-medium text-sm">{site.name}</div>

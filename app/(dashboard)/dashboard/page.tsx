@@ -433,9 +433,9 @@ export default function DashboardPage() {
         </div>
 
         {/* 전체 평균 요약 - 컴팩트 */}
-        <div className="bg-gray-50 rounded-xl p-3 md:p-4 mb-4 md:mb-6">
+        <div className="bg-white border border-gray-200 rounded-xl p-3 md:p-4 mb-4 md:mb-6">
           <div className="flex items-center justify-between mb-2 md:mb-3">
-            <span className="text-xs font-medium text-gray-500">전체 평균</span>
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">전체 평균</span>
           </div>
           <div className="grid grid-cols-4 gap-2 md:gap-4">
             {/* 기온 */}

@@ -20,6 +20,9 @@ import {
   BarChart3,
   Loader2,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
 } from 'lucide-react';
 
 export default function ControllersPage() {
@@ -33,6 +36,7 @@ export default function ControllersPage() {
   const [loading, setLoading] = useState(true);
   const [controlling, setControlling] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [isSitesOpen, setIsSitesOpen] = useState(false);
 
   // MQTT로 실시간 상태 업데이트
   const { isConnected } = useMqtt({
@@ -180,9 +184,69 @@ export default function ControllersPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-64px)]">
-      {/* 사이드바: 사이트 목록 */}
-      <div className="w-48 bg-gray-50 border-r border-gray-200 overflow-y-auto">
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-56px)] lg:h-[calc(100vh-64px)]">
+      {/* 모바일: 사이트 선택 드롭다운 */}
+      <div className="lg:hidden bg-white border-b border-gray-200 flex-shrink-0">
+        <button
+          onClick={() => setIsSitesOpen(!isSitesOpen)}
+          className="w-full px-4 py-3 flex items-center justify-between"
+        >
+          <div className="flex items-center space-x-2">
+            <MapPin className="w-4 h-4 text-purple-500" />
+            <span className="font-medium text-gray-900">
+              {selectedSiteInfo?.name || '사이트 선택'}
+            </span>
+            <span className="text-xs text-gray-500">
+              {stats.total}개 장치
+            </span>
+          </div>
+          {isSitesOpen ? (
+            <ChevronUp className="w-5 h-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-500" />
+          )}
+        </button>
+
+        {isSitesOpen && (
+          <div className="border-t border-gray-100 bg-gray-50 max-h-64 overflow-y-auto">
+            {sites.map((site) => {
+              const isSelected = site.sid === selectedSite;
+              const siteGateways = controllerGateways.filter((gw) => gw.sid === site.sid);
+              const deviceCount = siteGateways.reduce(
+                (sum, gw) => sum + (gw.deviceList?.length || 0),
+                0
+              );
+
+              return (
+                <button
+                  key={site.sid}
+                  onClick={() => {
+                    setSelectedSite(site.sid);
+                    setIsSitesOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2.5 border-b border-gray-100 last:border-b-0 flex items-center justify-between ${
+                    isSelected
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="font-medium text-sm">{site.name}</span>
+                  {deviceCount > 0 && (
+                    <span className={`text-xs px-1.5 py-0.5 rounded ${
+                      isSelected ? 'bg-blue-200' : 'bg-gray-200'
+                    }`}>
+                      {deviceCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 데스크톱: 사이드바 사이트 목록 */}
+      <div className="hidden lg:block w-48 bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0">
         <div className="p-3">
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             Sites
@@ -206,9 +270,9 @@ export default function ControllersPage() {
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  <span>{site.name}</span>
+                  <span className="truncate">{site.name}</span>
                   {deviceCount > 0 && (
-                    <span className={`text-xs px-1.5 py-0.5 rounded ${
+                    <span className={`text-xs px-1.5 py-0.5 rounded flex-shrink-0 ${
                       isSelected ? 'bg-blue-200' : 'bg-gray-200'
                     }`}>
                       {deviceCount}
@@ -222,17 +286,17 @@ export default function ControllersPage() {
       </div>
 
       {/* 메인 콘텐츠 */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-3 md:p-6">
         {/* 헤더 */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 md:mb-6">
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Site {selectedSiteInfo?.name || ''}
+              <h1 className="text-lg md:text-2xl font-bold text-gray-900">
+                컨트롤러
               </h1>
               {/* MQTT 연결 상태 */}
               <div
-                className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+                className={`flex items-center space-x-1 px-2 py-1 rounded-full text-[10px] md:text-xs ${
                   isConnected
                     ? 'bg-green-100 text-green-700'
                     : 'bg-red-100 text-red-700'
@@ -245,40 +309,43 @@ export default function ControllersPage() {
                 )}
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs md:text-sm text-gray-500 mt-0.5 md:mt-1">
               {stats.total}개 장치 · {stats.on}개 가동 중 · {stats.auto}개 자동
             </p>
           </div>
 
           <button
             onClick={loadData}
-            className="btn btn-secondary flex items-center space-x-2"
+            className="btn btn-secondary flex items-center space-x-1 md:space-x-2 text-xs md:text-sm px-2 md:px-3 py-1.5"
           >
-            <RefreshCw className="w-4 h-4" />
-            <span>새로고침</span>
+            <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <span className="hidden sm:inline">새로고침</span>
           </button>
         </div>
 
         {/* 게이트웨이 목록 */}
         {filteredGateways.length > 0 ? (
-          <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-800">Gateways</h2>
+          <div className="space-y-4 md:space-y-6">
+            <h2 className="text-base md:text-lg font-semibold text-gray-800 flex items-center">
+              <Power className="w-4 h-4 md:w-5 md:h-5 mr-2 text-purple-500" />
+              게이트웨이
+            </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {filteredGateways.map((gateway) => (
-                <div key={gateway.gid} className="card">
+                <div key={gateway.gid} className="card p-3 md:p-5">
                   {/* 게이트웨이 헤더 */}
-                  <div className="border-b border-gray-100 pb-3 mb-4">
-                    <h3 className="font-semibold text-gray-900 uppercase">
+                  <div className="border-b border-gray-100 pb-2 md:pb-3 mb-3 md:mb-4">
+                    <h3 className="font-semibold text-gray-900 uppercase text-sm md:text-base truncate">
                       {gateway.name || gateway.gname || gateway.gid?.slice(0, 8) || 'Gateway'}
                     </h3>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-[10px] md:text-xs text-gray-500">
                       {gateway.deviceList?.length || 0}개 장치
                     </p>
                   </div>
 
                   {/* 장치 목록 */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {gateway.deviceList?.map((device: any) => {
                       const dtype = device.dtype?.toLowerCase() || 'switch';
                       const config = CONTROLLER_CONFIG[dtype] || CONTROLLER_CONFIG.switch;
@@ -294,36 +361,36 @@ export default function ControllersPage() {
                           className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
                         >
                           {/* 장치 정보 */}
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-8 h-8 ${config.bgColor} rounded-lg flex items-center justify-center`}>
-                              <Icon className={`w-4 h-4 ${config.color}`} />
+                          <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                            <div className={`w-7 h-7 md:w-8 md:h-8 ${config.bgColor} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                              <Icon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${config.color}`} />
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
+                            <div className="min-w-0">
+                              <p className="text-xs md:text-sm font-medium text-gray-900 truncate">
                                 {config.label}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-[10px] md:text-xs text-gray-500">
                                 {isAuto ? 'Auto' : 'Manual'}
                               </p>
                             </div>
                           </div>
 
                           {/* 컨트롤 영역 */}
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
                             {/* ON/OFF 토글 */}
                             <button
                               onClick={() => handleControl(gateway, device, !isOn)}
                               disabled={isSwitchControlling}
-                              className={`relative w-12 h-6 rounded-full transition-colors ${
+                              className={`relative w-11 h-6 md:w-12 md:h-6 rounded-full transition-colors overflow-hidden ${
                                 isOn ? 'bg-green-500' : 'bg-gray-300'
                               } ${isSwitchControlling ? 'opacity-50' : ''}`}
                             >
                               {isSwitchControlling ? (
-                                <Loader2 className="w-4 h-4 text-white absolute top-1 left-1/2 -translate-x-1/2 animate-spin" />
+                                <Loader2 className="w-3 h-3 text-white absolute top-1.5 left-1/2 -translate-x-1/2 animate-spin" />
                               ) : (
                                 <span
-                                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                                    isOn ? 'translate-x-6' : 'translate-x-0.5'
+                                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                                    isOn ? 'left-6 md:left-7' : 'left-1'
                                   }`}
                                 />
                               )}
@@ -331,18 +398,18 @@ export default function ControllersPage() {
 
                             {/* Settings 버튼 */}
                             <button
-                              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+                              className="p-1 md:p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
                               title="Settings"
                             >
-                              <Settings className="w-4 h-4" />
+                              <Settings className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </button>
 
                             {/* Graph 버튼 */}
                             <button
-                              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+                              className="p-1 md:p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
                               title="Graph"
                             >
-                              <BarChart3 className="w-4 h-4" />
+                              <BarChart3 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </button>
                           </div>
                         </div>
@@ -354,15 +421,15 @@ export default function ControllersPage() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-16 text-gray-500">
-            <Power className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-lg">이 사이트에 등록된 컨트롤러가 없습니다</p>
+          <div className="text-center py-12 md:py-16 text-gray-500">
+            <Power className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 text-gray-300" />
+            <p className="text-sm md:text-lg">이 사이트에 등록된 컨트롤러가 없습니다</p>
           </div>
         )}
 
         {/* 마지막 업데이트 */}
         {lastUpdate && (
-          <p className="text-center text-sm text-gray-400 mt-8">
+          <p className="text-center text-xs md:text-sm text-gray-400 mt-6 md:mt-8">
             마지막 상태 업데이트: {lastUpdate.toLocaleTimeString('ko-KR')}
           </p>
         )}

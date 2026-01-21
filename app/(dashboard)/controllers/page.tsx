@@ -9,15 +9,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/lib/authStore';
 import { useMqtt } from '@/hooks/useMqtt';
 import { siteApi, gatewayApi, deviceApi } from '@/lib/api';
+import { toast } from '@/lib/toastStore';
+import { CONTROLLER_CONFIG } from '@/lib/constants';
 import {
   Power,
-  Lightbulb,
-  Droplets,
-  Wind,
-  Thermometer,
-  Snowflake,
-  Fan,
-  Zap,
   Wifi,
   WifiOff,
   RefreshCw,
@@ -26,26 +21,6 @@ import {
   Loader2,
   ChevronRight,
 } from 'lucide-react';
-
-// 컨트롤러 타입별 설정
-const CONTROLLER_CONFIG: Record<string, {
-  icon: any;
-  color: string;
-  bgColor: string;
-  label: string;
-}> = {
-  led: { icon: Lightbulb, color: 'text-yellow-500', bgColor: 'bg-yellow-100', label: 'LED' },
-  pump: { icon: Droplets, color: 'text-blue-500', bgColor: 'bg-blue-100', label: 'PUMP' },
-  water: { icon: Droplets, color: 'text-cyan-500', bgColor: 'bg-cyan-100', label: 'WATER' },
-  ac: { icon: Snowflake, color: 'text-indigo-500', bgColor: 'bg-indigo-100', label: 'AC' },
-  heater: { icon: Thermometer, color: 'text-red-500', bgColor: 'bg-red-100', label: 'HEATER' },
-  freezer: { icon: Snowflake, color: 'text-blue-600', bgColor: 'bg-blue-100', label: 'FREEZER' },
-  humid: { icon: Wind, color: 'text-teal-500', bgColor: 'bg-teal-100', label: 'HUMID' },
-  ventilator: { icon: Fan, color: 'text-green-500', bgColor: 'bg-green-100', label: 'VENTILATOR' },
-  co2: { icon: Wind, color: 'text-emerald-500', bgColor: 'bg-emerald-100', label: 'CO2' },
-  doser: { icon: Zap, color: 'text-purple-500', bgColor: 'bg-purple-100', label: 'DOSER' },
-  switch: { icon: Power, color: 'text-gray-500', bgColor: 'bg-gray-100', label: 'SWITCH' },
-};
 
 export default function ControllersPage() {
   const { user } = useAuthStore();
@@ -143,7 +118,7 @@ export default function ControllersPage() {
       );
     } catch (error) {
       console.error('장치 제어 실패:', error);
-      alert('장치 제어에 실패했습니다.');
+      toast.error('장치 제어에 실패했습니다.');
     } finally {
       setControlling(null);
     }
@@ -173,7 +148,7 @@ export default function ControllersPage() {
       );
     } catch (error) {
       console.error('모드 변경 실패:', error);
-      alert('모드 변경에 실패했습니다.');
+      toast.error('모드 변경에 실패했습니다.');
     } finally {
       setControlling(null);
     }

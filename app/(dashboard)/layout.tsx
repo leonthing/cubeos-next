@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/authStore';
 import Sidebar from '@/components/layout/Sidebar';
+import ToastContainer from '@/components/ui/Toast';
 
 export default function DashboardLayout({
   children,
@@ -46,6 +47,9 @@ export default function DashboardLayout({
       <main className="ml-64 min-h-screen">
         {children}
       </main>
+
+      {/* 토스트 알림 */}
+      <ToastContainer />
     </div>
   );
 }

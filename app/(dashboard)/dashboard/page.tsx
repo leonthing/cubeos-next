@@ -9,6 +9,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/lib/authStore';
 import { useMqtt } from '@/hooks/useMqtt';
 import { siteApi, gatewayApi, logApi, deviceApi } from '@/lib/api';
+import { toast } from '@/lib/toastStore';
+import {
+  normalizeSensorType,
+  SENSOR_CONFIG,
+  CONTROLLER_CONFIG,
+  CHART_COLORS,
+  PERIOD_OPTIONS,
+} from '@/lib/constants';
 import Hls from 'hls.js';
 import {
   LineChart,
@@ -21,74 +29,22 @@ import {
   Legend,
 } from 'recharts';
 import {
-  Thermometer,
-  Droplets,
-  Wind,
-  Lightbulb,
   Activity,
   Wifi,
   WifiOff,
   RefreshCw,
   Layers,
   Power,
-  Snowflake,
-  Fan,
-  Zap,
-  Settings,
-  BarChart3,
   Video,
   X,
   Loader2,
 } from 'lucide-react';
 
-// 센서 타입 정규화
-const normalizeSensorType = (dtype: string): string => {
-  const type = dtype.toLowerCase();
-
-  if (type.includes('water_temp') || type === 'water_temperature') return 'water_temp';
-  if (type.includes('air_temp') || type === 'tmp' || type === '온도' || type === 'temperature') return 'temperature';
-  if (type.includes('temp')) return 'temperature';
-  if (type.includes('humid') || type === 'hum' || type === '습도') return 'humidity';
-  if (type.includes('co2') || type === 'carbon') return 'co2';
-  if (type.includes('ph')) return 'ph';
-  if (type.includes('ec') || type.includes('conductivity')) return 'ec';
-  if (type.includes('light') || type.includes('lux') || type === '조도') return 'light';
-  if (type.includes('level') || type === '수위') return 'water_level';
-
-  return type;
-};
-
-// 센서 타입별 설정
-const SENSOR_CONFIG: Record<string, { icon: any; unit: string; color: string; label: string }> = {
-  temperature: { icon: Thermometer, unit: '°C', color: 'text-red-500', label: '기온' },
-  water_temp: { icon: Thermometer, unit: '°C', color: 'text-orange-500', label: '수온' },
-  humidity: { icon: Droplets, unit: '%', color: 'text-blue-500', label: '습도' },
-  co2: { icon: Wind, unit: 'ppm', color: 'text-green-500', label: 'CO2' },
-  light: { icon: Lightbulb, unit: 'lux', color: 'text-yellow-500', label: '조도' },
-  ph: { icon: Activity, unit: 'pH', color: 'text-purple-500', label: 'pH' },
-  ec: { icon: Activity, unit: 'mS/cm', color: 'text-indigo-500', label: 'EC' },
-  water_level: { icon: Droplets, unit: 'm', color: 'text-cyan-500', label: '수위' },
-};
-
-// 컨트롤러 타입별 설정
-const CONTROLLER_CONFIG: Record<string, { icon: any; color: string; bgColor: string; label: string }> = {
-  led: { icon: Lightbulb, color: 'text-yellow-500', bgColor: 'bg-yellow-100', label: 'LED' },
-  pump: { icon: Droplets, color: 'text-blue-500', bgColor: 'bg-blue-100', label: 'PUMP' },
-  water: { icon: Droplets, color: 'text-cyan-500', bgColor: 'bg-cyan-100', label: 'WATER' },
-  ac: { icon: Snowflake, color: 'text-indigo-500', bgColor: 'bg-indigo-100', label: 'AC' },
-  heater: { icon: Thermometer, color: 'text-red-500', bgColor: 'bg-red-100', label: 'HEATER' },
-  freezer: { icon: Snowflake, color: 'text-blue-600', bgColor: 'bg-blue-100', label: 'FREEZER' },
-  humid: { icon: Wind, color: 'text-teal-500', bgColor: 'bg-teal-100', label: 'HUMID' },
-  ventilator: { icon: Fan, color: 'text-green-500', bgColor: 'bg-green-100', label: 'VENTILATOR' },
-  co2: { icon: Wind, color: 'text-emerald-500', bgColor: 'bg-emerald-100', label: 'CO2' },
-  doser: { icon: Zap, color: 'text-purple-500', bgColor: 'bg-purple-100', label: 'DOSER' },
-  switch: { icon: Power, color: 'text-gray-500', bgColor: 'bg-gray-100', label: 'SWITCH' },
-};
-
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const farmId = user?.currentLocation || '';
 
+  // TODO: API 응답 타입 정의 후 any 제거
   const [sites, setSites] = useState<any[]>([]);
   const [sensorGateways, setSensorGateways] = useState<any[]>([]);
   const [controllerGateways, setControllerGateways] = useState<any[]>([]);
@@ -135,7 +91,7 @@ export default function DashboardPage() {
       );
     } catch (error) {
       console.error('장치 제어 실패:', error);
-      alert('장치 제어에 실패했습니다.');
+      toast.error('장치 제어에 실패했습니다.');
     } finally {
       setControlling(null);
     }
@@ -165,7 +121,7 @@ export default function DashboardPage() {
       );
     } catch (error) {
       console.error('모드 변경 실패:', error);
-      alert('모드 변경에 실패했습니다.');
+      toast.error('모드 변경에 실패했습니다.');
     } finally {
       setControlling(null);
     }
@@ -724,28 +680,6 @@ function CameraModal({ url, name, onClose }: { url: string; name: string; onClos
     </div>
   );
 }
-
-// 기간 옵션
-const PERIOD_OPTIONS = [
-  { label: 'Today', days: 1 },
-  { label: '3 Days', days: 3 },
-  { label: '7 Days', days: 7 },
-  { label: '10 Days', days: 10 },
-  { label: '30 Days', days: 30 },
-  { label: '90 Days', days: 90 },
-];
-
-// 센서 타입별 차트 색상
-const CHART_COLORS: Record<string, string> = {
-  temperature: '#ef4444',
-  humidity: '#3b82f6',
-  co2: '#22c55e',
-  water_temp: '#f97316',
-  ph: '#a855f7',
-  ec: '#6366f1',
-  light: '#eab308',
-  water_level: '#06b6d4',
-};
 
 // 센서 그래프 모달 컴포넌트
 function SensorGraphModal({

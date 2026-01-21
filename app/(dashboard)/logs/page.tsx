@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/authStore';
 import { logApi } from '@/lib/api';
+import { toast } from '@/lib/toastStore';
 import { format, subDays } from 'date-fns';
 import {
   FileText,
@@ -114,7 +115,7 @@ export default function LogsPage() {
   // 다운로드 핸들러
   const handleDownload = async () => {
     if (logType !== 'sensor' || !deviceId) {
-      alert('센서 로그 다운로드는 장치 ID가 필요합니다.');
+      toast.warning('센서 로그 다운로드는 장치 ID가 필요합니다.');
       return;
     }
 
@@ -137,7 +138,7 @@ export default function LogsPage() {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('다운로드 실패:', error);
-      alert('로그 다운로드에 실패했습니다.');
+      toast.error('로그 다운로드에 실패했습니다.');
     } finally {
       setDownloading(false);
     }

@@ -5,10 +5,11 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
-// 환경 변수에서 API 주소 가져오기
-// Vercel 배포 시 프록시가 작동하지 않아 직접 연결
+// 환경 변수에서 API 설정 가져오기
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.nthing.link:8080';
 const API_ENV = process.env.NEXT_PUBLIC_API_ENV || 'production';
+const API_CLIENT_ID = process.env.NEXT_PUBLIC_API_CLIENT_ID || '';
+const API_CLIENT_SECRET = process.env.NEXT_PUBLIC_API_CLIENT_SECRET || '';
 
 // Farm API 경로
 // 읽기 API는 'portal' 경로 사용 (Farm-Id 헤더로 필터링)
@@ -96,8 +97,8 @@ export const authApi = {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         auth: {
-          username: 'cube-farm',
-          password: 'nthing_dkaghdi00', // TODO: 보안 개선 필요
+          username: API_CLIENT_ID,
+          password: API_CLIENT_SECRET,
         },
       }
     );
@@ -237,7 +238,7 @@ export const deviceApi = {
     const url = `/api/proxy/farm/portal/device/${endpoint}`;
 
     // Basic Auth 인코딩
-    const basicAuth = btoa('cube-farm:nthing_dkaghdi00');
+    const basicAuth = btoa(`${API_CLIENT_ID}:${API_CLIENT_SECRET}`);
 
     // 원본 CubeOS와 동일하게 Bearer 토큰 + Basic Auth 조합
     const authHeader = token

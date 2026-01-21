@@ -20,12 +20,15 @@ export interface Farm {
  */
 export interface Site {
   sid: string;            // 사이트 ID
-  sname: string;          // 사이트 이름
-  stype: string;          // 사이트 타입
+  sname?: string;         // 사이트 이름
+  name?: string;          // 사이트 이름 (대체)
+  stype?: string;         // 사이트 타입
   description?: string;
-  alarmEnabled: boolean;  // 알람 활성화 여부
+  alarmEnabled?: boolean; // 알람 활성화 여부
+  alarm?: boolean;        // 알람 활성화 여부 (대체)
   recipe?: Recipe;        // 적용된 레시피
   environment?: EnvironmentSettings;
+  camera?: string;        // 카메라 URL
 }
 
 /**
@@ -33,12 +36,15 @@ export interface Site {
  */
 export interface Gateway {
   gid: string;            // 게이트웨이 ID
-  gname: string;          // 게이트웨이 이름
-  gtype: 'sensor' | 'controller';  // 타입
+  gname?: string;         // 게이트웨이 이름
+  name?: string;          // 게이트웨이 이름 (대체)
+  gtype?: 'sensor' | 'controller';  // 타입
+  sid?: string;           // 소속 사이트 ID
   firmware_version?: string;
   last_update?: number;   // 마지막 업데이트 시간 (Unix timestamp)
   channel?: number;       // 채널 수
   deviceList: Device[];   // 연결된 장치 목록
+  camera?: string;        // 카메라 URL
 }
 
 /**
@@ -157,4 +163,45 @@ export interface Recipe {
   environment: EnvironmentSettings;
   duration: number;       // 재배 기간 (일)
   description?: string;
+}
+
+// ==================================================
+// API 응답 타입
+// ==================================================
+
+/**
+ * 사이트 API 응답
+ */
+export interface SiteApiResponse {
+  status: string;
+  site: Site[];
+}
+
+/**
+ * 게이트웨이 API 응답
+ */
+export interface GatewayApiResponse {
+  status: string;
+  gateways: Gateway[];
+}
+
+/**
+ * 센서 로그 데이터
+ */
+export interface SensorLog {
+  receiveTime: number;
+  value: number;
+  sensor_type?: string;
+  gatewayId?: string;
+  deviceId?: string;
+}
+
+/**
+ * 센서 로그 API 응답
+ */
+export interface SensorLogApiResponse {
+  status: string;
+  result?: {
+    data: SensorLog[];
+  };
 }

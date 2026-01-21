@@ -400,62 +400,56 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 전체 요약 카드 - 더 크고 눈에 띄게 */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
-          {/* 기온 카드 */}
-          <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-100 rounded-xl md:rounded-2xl p-3 md:p-5">
-            <div className="flex items-center justify-between mb-2 md:mb-3">
-              <span className="text-xs md:text-sm font-medium text-red-600">기온</span>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-red-100 rounded-lg md:rounded-xl flex items-center justify-center">
-                <span className="text-red-500 text-sm md:text-lg">🌡️</span>
-              </div>
-            </div>
-            <p className="text-2xl md:text-4xl font-bold text-red-600">
-              {getAverage(totalSensorSummary, 'temperature')?.toFixed(1) ?? '--'}
-              <span className="text-sm md:text-lg font-normal text-red-400 ml-1">°C</span>
-            </p>
+        {/* 전체 평균 요약 - 컴팩트 */}
+        <div className="bg-gray-50 rounded-xl p-3 md:p-4 mb-4 md:mb-6">
+          <div className="flex items-center justify-between mb-2 md:mb-3">
+            <span className="text-xs font-medium text-gray-500">전체 평균</span>
           </div>
-
-          {/* 습도 카드 */}
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 rounded-xl md:rounded-2xl p-3 md:p-5">
-            <div className="flex items-center justify-between mb-2 md:mb-3">
-              <span className="text-xs md:text-sm font-medium text-blue-600">습도</span>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg md:rounded-xl flex items-center justify-center">
-                <span className="text-blue-500 text-sm md:text-lg">💧</span>
+          <div className="grid grid-cols-4 gap-2 md:gap-4">
+            {/* 기온 */}
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-xs">🌡️</span>
+                <span className="text-[10px] md:text-xs text-gray-500">기온</span>
               </div>
+              <p className="text-base md:text-xl font-bold text-red-500">
+                {getAverage(totalSensorSummary, 'temperature')?.toFixed(1) ?? '--'}
+                <span className="text-[10px] md:text-xs font-normal text-gray-400">°C</span>
+              </p>
             </div>
-            <p className="text-2xl md:text-4xl font-bold text-blue-600">
-              {getAverage(totalSensorSummary, 'humidity')?.toFixed(1) ?? '--'}
-              <span className="text-sm md:text-lg font-normal text-blue-400 ml-1">%</span>
-            </p>
-          </div>
-
-          {/* CO2 카드 */}
-          <div className="bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100 rounded-xl md:rounded-2xl p-3 md:p-5">
-            <div className="flex items-center justify-between mb-2 md:mb-3">
-              <span className="text-xs md:text-sm font-medium text-emerald-600">CO2</span>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-100 rounded-lg md:rounded-xl flex items-center justify-center">
-                <span className="text-emerald-500 text-sm md:text-lg">🌿</span>
+            {/* 습도 */}
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-xs">💧</span>
+                <span className="text-[10px] md:text-xs text-gray-500">습도</span>
               </div>
+              <p className="text-base md:text-xl font-bold text-blue-500">
+                {getAverage(totalSensorSummary, 'humidity')?.toFixed(1) ?? '--'}
+                <span className="text-[10px] md:text-xs font-normal text-gray-400">%</span>
+              </p>
             </div>
-            <p className="text-2xl md:text-4xl font-bold text-emerald-600">
-              {getAverage(totalSensorSummary, 'co2')?.toFixed(0) ?? '--'}
-              <span className="text-sm md:text-lg font-normal text-emerald-400 ml-1">ppm</span>
-            </p>
-          </div>
-
-          {/* 컨트롤러 카드 */}
-          <div className="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 rounded-xl md:rounded-2xl p-3 md:p-5">
-            <div className="flex items-center justify-between mb-2 md:mb-3">
-              <span className="text-xs md:text-sm font-medium text-violet-600">컨트롤러</span>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-violet-100 rounded-lg md:rounded-xl flex items-center justify-center">
-                <Power className="w-4 h-4 md:w-5 md:h-5 text-violet-500" />
+            {/* CO2 */}
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-xs">🌿</span>
+                <span className="text-[10px] md:text-xs text-gray-500">CO2</span>
               </div>
+              <p className="text-base md:text-xl font-bold text-emerald-500">
+                {getAverage(totalSensorSummary, 'co2')?.toFixed(0) ?? '--'}
+                <span className="text-[10px] md:text-xs font-normal text-gray-400">ppm</span>
+              </p>
             </div>
-            <p className="text-2xl md:text-4xl font-bold text-violet-600">
-              {totalControllerSummary.on}
-              <span className="text-sm md:text-lg font-normal text-violet-400 ml-1">/ {totalControllerSummary.total}</span>
-            </p>
+            {/* 컨트롤러 */}
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <Power className="w-3 h-3 text-violet-500" />
+                <span className="text-[10px] md:text-xs text-gray-500">컨트롤러</span>
+              </div>
+              <p className="text-base md:text-xl font-bold text-violet-500">
+                {totalControllerSummary.on}
+                <span className="text-[10px] md:text-xs font-normal text-gray-400">/{totalControllerSummary.total}</span>
+              </p>
+            </div>
           </div>
         </div>
 

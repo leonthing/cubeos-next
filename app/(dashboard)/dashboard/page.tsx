@@ -334,34 +334,61 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 전체 요약 카드 */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="card py-4">
-            <p className="text-xs text-gray-500 mb-1">전체 기온</p>
-            <p className="text-2xl font-bold text-red-500">
+        {/* 전체 요약 카드 - 더 크고 눈에 띄게 */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* 기온 카드 */}
+          <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-100 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-red-600">기온</span>
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                <span className="text-red-500 text-lg">🌡️</span>
+              </div>
+            </div>
+            <p className="text-4xl font-bold text-red-600">
               {getAverage(totalSensorSummary, 'temperature')?.toFixed(1) ?? '--'}
-              <span className="text-sm text-gray-400 ml-1">°C</span>
+              <span className="text-lg font-normal text-red-400 ml-1">°C</span>
             </p>
           </div>
-          <div className="card py-4">
-            <p className="text-xs text-gray-500 mb-1">전체 습도</p>
-            <p className="text-2xl font-bold text-blue-500">
+
+          {/* 습도 카드 */}
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-blue-600">습도</span>
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <span className="text-blue-500 text-lg">💧</span>
+              </div>
+            </div>
+            <p className="text-4xl font-bold text-blue-600">
               {getAverage(totalSensorSummary, 'humidity')?.toFixed(1) ?? '--'}
-              <span className="text-sm text-gray-400 ml-1">%</span>
+              <span className="text-lg font-normal text-blue-400 ml-1">%</span>
             </p>
           </div>
-          <div className="card py-4">
-            <p className="text-xs text-gray-500 mb-1">전체 CO2</p>
-            <p className="text-2xl font-bold text-green-500">
+
+          {/* CO2 카드 */}
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-emerald-600">CO2</span>
+              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <span className="text-emerald-500 text-lg">🌿</span>
+              </div>
+            </div>
+            <p className="text-4xl font-bold text-emerald-600">
               {getAverage(totalSensorSummary, 'co2')?.toFixed(0) ?? '--'}
-              <span className="text-sm text-gray-400 ml-1">ppm</span>
+              <span className="text-lg font-normal text-emerald-400 ml-1">ppm</span>
             </p>
           </div>
-          <div className="card py-4">
-            <p className="text-xs text-gray-500 mb-1">컨트롤러</p>
-            <p className="text-2xl font-bold text-gray-700">
+
+          {/* 컨트롤러 카드 */}
+          <div className="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-violet-600">컨트롤러</span>
+              <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
+                <Power className="w-5 h-5 text-violet-500" />
+              </div>
+            </div>
+            <p className="text-4xl font-bold text-violet-600">
               {totalControllerSummary.on}
-              <span className="text-sm text-gray-400 ml-1">/{totalControllerSummary.total}</span>
+              <span className="text-lg font-normal text-violet-400 ml-1">/ {totalControllerSummary.total}</span>
             </p>
           </div>
         </div>
@@ -369,38 +396,45 @@ export default function DashboardPage() {
         {/* 선택된 사이트 상세 */}
         {selectedSite && selectedSiteInfo && (
           <>
-            {/* 사이트 헤더 */}
-            <div className="card mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="font-bold text-blue-600 text-lg">{selectedSiteInfo.name?.charAt(0) || 'S'}</span>
+            {/* 사이트 헤더 - 강조된 디자인 */}
+            <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 rounded-2xl p-6 mb-6 text-white shadow-lg">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/30">
+                    <span className="font-bold text-white text-2xl">{selectedSiteInfo.name?.charAt(0) || 'S'}</span>
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 whitespace-nowrap">
-                      {selectedSiteInfo.name} - {selectedSiteInfo.stype || 'WORKING'}
+                    <h2 className="text-2xl font-bold whitespace-nowrap">
+                      {selectedSiteInfo.name}
                     </h2>
-                    <p className="text-sm text-gray-500">
-                      센서 {selectedSiteSensors.length}개 / 컨트롤러 {selectedSiteControllers.length}개 게이트웨이
-                    </p>
+                    <div className="flex items-center space-x-3 mt-1">
+                      <span className="bg-white/20 px-3 py-0.5 rounded-full text-sm font-medium">
+                        {selectedSiteInfo.stype || 'WORKING'}
+                      </span>
+                      <span className="text-blue-100 text-sm">
+                        센서 {selectedSiteSensors.length}개 · 컨트롤러 {selectedSiteControllers.length}개
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   {/* CAM 버튼 */}
                   {selectedSiteInfo.camera && (
                     <button
                       onClick={() => setCameraModal({ open: true, url: selectedSiteInfo.camera, name: selectedSiteInfo.name })}
-                      className="flex items-center space-x-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl transition-colors border border-white/30"
                     >
-                      <Video className="w-4 h-4 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-700">CAM</span>
+                      <Video className="w-5 h-5" />
+                      <span className="font-medium">CAM</span>
                     </button>
                   )}
-                  <span className="badge badge-success">정상</span>
+                  <span className="bg-green-400 text-green-900 px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
+                    ✓ 정상
+                  </span>
                 </div>
               </div>
 
-              {/* 사이트 센서 요약 */}
+              {/* 사이트 센서 요약 - 반투명 카드 */}
               <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
                 {(() => {
                   const summary = getSiteSensorSummary(selectedSite);
@@ -412,14 +446,14 @@ export default function DashboardPage() {
                       : null;
 
                     return (
-                      <div key={type} className="bg-gray-50 rounded-lg p-3">
+                      <div key={type} className="bg-white/15 backdrop-blur rounded-xl p-3 border border-white/20">
                         <div className="flex items-center space-x-2 mb-1">
-                          <Icon className={`w-4 h-4 ${config?.color || 'text-gray-500'}`} />
-                          <span className="text-xs text-gray-500">{config?.label || type}</span>
+                          <Icon className="w-4 h-4 text-white/80" />
+                          <span className="text-xs text-white/70">{config?.label || type}</span>
                         </div>
-                        <p className={`text-xl font-bold ${config?.color || 'text-gray-700'}`}>
+                        <p className="text-2xl font-bold text-white">
                           {avg !== null ? (type === 'co2' ? avg.toFixed(0) : avg.toFixed(1)) : '--'}
-                          <span className="text-xs text-gray-400 ml-1">{config?.unit || ''}</span>
+                          <span className="text-sm text-white/60 ml-1">{config?.unit || ''}</span>
                         </p>
                       </div>
                     );
@@ -428,60 +462,82 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* 센서 게이트웨이 */}
+            {/* 센서 게이트웨이 - 개선된 디자인 */}
             {selectedSiteSensors.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
-                  <Layers className="w-4 h-4 mr-2" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <Layers className="w-5 h-5 mr-2 text-blue-500" />
                   센서 게이트웨이
                 </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
                   {selectedSiteSensors.map((gateway) => (
-                    <div key={gateway.gid} className="card">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-gray-900">{gateway.name || gateway.gname || gateway.gid?.slice(0, 8) || 'Gateway'}</h4>
-                        <div className="flex items-center space-x-2">
+                    <div key={gateway.gid} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                      {/* 게이트웨이 헤더 */}
+                      <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-5 py-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+                              <Layers className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{gateway.name || gateway.gname || gateway.gid?.slice(0, 8) || 'Gateway'}</h4>
+                              <p className="text-xs text-gray-500">
+                                {gateway.last_update
+                                  ? `업데이트: ${new Date(gateway.last_update).toLocaleTimeString('ko-KR')}`
+                                  : '데이터 없음'}
+                              </p>
+                            </div>
+                          </div>
                           <button
                             onClick={() => setGraphModal({
                               open: true,
                               gateway,
                               name: gateway.name || gateway.gname || gateway.gid?.slice(0, 8) || 'Gateway'
                             })}
-                            className="text-xs px-2 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                            className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors"
                           >
                             See graph
                           </button>
-                          <span className="text-xs text-gray-400">
-                            {gateway.last_update
-                              ? new Date(gateway.last_update).toLocaleTimeString('ko-KR')
-                              : '-'}
-                          </span>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {gateway.deviceList?.map((device: any) => {
-                          const normalizedType = normalizeSensorType(device.dtype);
-                          const config = SENSOR_CONFIG[normalizedType];
-                          const Icon = config?.icon || Activity;
+                      {/* 센서 값 그리드 */}
+                      <div className="p-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {gateway.deviceList?.map((device: any) => {
+                            const normalizedType = normalizeSensorType(device.dtype);
+                            const config = SENSOR_CONFIG[normalizedType];
+                            const Icon = config?.icon || Activity;
+                            const value = device.status !== undefined && device.status !== null
+                              ? typeof device.status === 'number'
+                                ? device.status.toFixed(normalizedType === 'co2' ? 0 : 1)
+                                : device.status
+                              : '--';
 
-                          return (
-                            <div key={device.did} className="bg-gray-50 rounded-lg p-2">
-                              <div className="flex items-center space-x-1 mb-1">
-                                <Icon className={`w-3 h-3 ${config?.color || 'text-gray-500'}`} />
-                                <span className="text-xs text-gray-500 truncate">{config?.label || device.dtype}</span>
+                            // 센서 타입별 배경색
+                            const bgColors: Record<string, string> = {
+                              temperature: 'bg-gradient-to-br from-red-50 to-orange-50 border-red-100',
+                              humidity: 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-100',
+                              co2: 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-100',
+                              ph: 'bg-gradient-to-br from-purple-50 to-violet-50 border-purple-100',
+                              ec: 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-100',
+                            };
+                            const bgColor = bgColors[normalizedType] || 'bg-gray-50 border-gray-100';
+
+                            return (
+                              <div key={device.did} className={`${bgColor} border rounded-xl p-4`}>
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <Icon className={`w-4 h-4 ${config?.color || 'text-gray-500'}`} />
+                                  <span className="text-sm font-medium text-gray-600">{config?.label || device.dtype}</span>
+                                </div>
+                                <p className={`text-2xl font-bold ${config?.color || 'text-gray-700'}`}>
+                                  {value}
+                                  <span className="text-sm font-normal text-gray-400 ml-1">{config?.unit || ''}</span>
+                                </p>
                               </div>
-                              <p className={`text-lg font-bold ${config?.color || 'text-gray-700'}`}>
-                                {device.status !== undefined && device.status !== null
-                                  ? typeof device.status === 'number'
-                                    ? device.status.toFixed(normalizedType === 'co2' ? 0 : 1)
-                                    : device.status
-                                  : '--'}
-                                <span className="text-xs text-gray-400 ml-1">{config?.unit || ''}</span>
-                              </p>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -492,22 +548,27 @@ export default function DashboardPage() {
             {/* 컨트롤러 게이트웨이 */}
             {selectedSiteControllers.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
-                  <Power className="w-4 h-4 mr-2" />
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                    <Power className="w-5 h-5 text-purple-600" />
+                  </div>
                   컨트롤러 게이트웨이
+                  <span className="ml-2 text-sm font-normal text-gray-500">
+                    ({selectedSiteControllers.length}개)
+                  </span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {selectedSiteControllers.map((gateway) => (
-                    <div key={gateway.gid} className="card">
+                    <div key={gateway.gid} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                       {/* 게이트웨이 헤더 */}
-                      <div className="border-b border-gray-100 pb-2 mb-3">
-                        <h4 className="font-semibold text-gray-900 uppercase text-sm">
+                      <div className="bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-3">
+                        <h4 className="font-bold text-white uppercase text-sm tracking-wide">
                           {gateway.name || gateway.gname || gateway.gid?.slice(0, 8) || 'Gateway'}
                         </h4>
                       </div>
 
                       {/* 장치 목록 */}
-                      <div className="space-y-3">
+                      <div className="p-3 space-y-3">
                         {gateway.deviceList?.map((device: any) => {
                           const dtype = device.dtype?.toLowerCase() || 'switch';
                           const config = CONTROLLER_CONFIG[dtype] || CONTROLLER_CONFIG.switch;
@@ -518,56 +579,69 @@ export default function DashboardPage() {
                           const isModeControlling = controlling === `${device.did}-mode`;
 
                           return (
-                            <div key={device.did} className="bg-gray-50 rounded-lg p-3">
-                              {/* 상단: 아이콘, 라벨, 토글 */}
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center space-x-2">
-                                  <Icon className={`w-5 h-5 ${config.color}`} />
-                                  <span className="font-medium text-gray-800 text-sm">
-                                    {config.label}
-                                  </span>
+                            <div
+                              key={device.did}
+                              className={`rounded-xl p-3 border-2 transition-all ${
+                                isOn
+                                  ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
+                                  : 'bg-gray-50 border-gray-100'
+                              }`}
+                            >
+                              {/* 상단: 아이콘, 라벨, 상태 */}
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center space-x-3">
+                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                    isOn ? 'bg-green-100' : 'bg-gray-200'
+                                  }`}>
+                                    <Icon className={`w-5 h-5 ${isOn ? 'text-green-600' : 'text-gray-400'}`} />
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-800 text-sm block">
+                                      {config.label}
+                                    </span>
+                                    <span className={`text-xs font-medium ${isOn ? 'text-green-600' : 'text-gray-400'}`}>
+                                      {isOn ? '● 작동중' : '○ 정지'}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                  {/* ON/OFF 토글 */}
-                                  <button
-                                    onClick={() => handleControl(gateway, device, !isOn)}
-                                    disabled={isSwitchControlling}
-                                    className={`w-10 h-5 rounded-full relative transition-colors ${
-                                      isOn ? 'bg-green-400' : 'bg-gray-300'
-                                    } ${isSwitchControlling ? 'opacity-50' : 'cursor-pointer hover:opacity-80'}`}
-                                  >
-                                    {isSwitchControlling ? (
-                                      <Loader2 className="w-3 h-3 text-white absolute top-1 left-1/2 -translate-x-1/2 animate-spin" />
-                                    ) : (
-                                      <span
-                                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                                          isOn ? 'translate-x-5' : 'translate-x-0.5'
-                                        }`}
-                                      />
-                                    )}
-                                  </button>
-                                  {/* Auto/Manual 토글 */}
-                                  <button
-                                    onClick={() => handleModeChange(gateway, device, !isAuto)}
-                                    disabled={isModeControlling}
-                                    className={`text-xs w-14 py-0.5 rounded ${
-                                      isAuto
-                                        ? 'bg-blue-100 text-blue-600'
-                                        : 'bg-gray-200 text-gray-600'
-                                    } ${isModeControlling ? 'opacity-50' : 'hover:opacity-80 cursor-pointer'}`}
-                                  >
-                                    {isModeControlling ? '...' : isAuto ? 'Auto' : 'Manual'}
-                                  </button>
-                                </div>
+                                {/* ON/OFF 토글 */}
+                                <button
+                                  onClick={() => handleControl(gateway, device, !isOn)}
+                                  disabled={isSwitchControlling}
+                                  className={`w-14 h-7 rounded-full relative transition-all shadow-inner ${
+                                    isOn ? 'bg-green-500' : 'bg-gray-300'
+                                  } ${isSwitchControlling ? 'opacity-50' : 'cursor-pointer hover:shadow-md'}`}
+                                >
+                                  {isSwitchControlling ? (
+                                    <Loader2 className="w-4 h-4 text-white absolute top-1.5 left-1/2 -translate-x-1/2 animate-spin" />
+                                  ) : (
+                                    <span
+                                      className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
+                                        isOn ? 'translate-x-7' : 'translate-x-1'
+                                      }`}
+                                    />
+                                  )}
+                                </button>
                               </div>
 
-                              {/* 하단: Settings, Graph 버튼 */}
+                              {/* 하단: Auto/Manual, Settings, Graph 버튼 */}
                               <div className="flex space-x-2">
-                                <button className="flex-1 px-2 py-1 text-xs text-gray-600 bg-white border border-gray-200 rounded hover:bg-gray-100 transition-colors">
-                                  Settings
+                                <button
+                                  onClick={() => handleModeChange(gateway, device, !isAuto)}
+                                  disabled={isModeControlling}
+                                  className={`flex-1 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                                    isAuto
+                                      ? 'bg-blue-500 text-white shadow-sm'
+                                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                  } ${isModeControlling ? 'opacity-50' : 'cursor-pointer'}`}
+                                >
+                                  {isModeControlling ? '...' : isAuto ? '🤖 Auto' : '✋ Manual'}
                                 </button>
-                                <button className="flex-1 px-2 py-1 text-xs text-gray-600 bg-white border border-gray-200 rounded hover:bg-gray-100 transition-colors">
-                                  Graph
+                                <button className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                  ⚙️
+                                </button>
+                                <button className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                  📊
                                 </button>
                               </div>
                             </div>

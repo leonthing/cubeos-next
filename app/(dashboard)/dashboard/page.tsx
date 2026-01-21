@@ -608,16 +608,16 @@ export default function DashboardPage() {
                                 <button
                                   onClick={() => handleControl(gateway, device, !isOn)}
                                   disabled={isSwitchControlling}
-                                  className={`w-14 h-7 rounded-full relative transition-all shadow-inner ${
+                                  className={`w-12 h-6 rounded-full relative transition-all shadow-inner overflow-hidden flex-shrink-0 ${
                                     isOn ? 'bg-green-500' : 'bg-gray-300'
                                   } ${isSwitchControlling ? 'opacity-50' : 'cursor-pointer hover:shadow-md'}`}
                                 >
                                   {isSwitchControlling ? (
-                                    <Loader2 className="w-4 h-4 text-white absolute top-1.5 left-1/2 -translate-x-1/2 animate-spin" />
+                                    <Loader2 className="w-3 h-3 text-white absolute top-1.5 left-1/2 -translate-x-1/2 animate-spin" />
                                   ) : (
                                     <span
-                                      className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
-                                        isOn ? 'translate-x-7' : 'translate-x-1'
+                                      className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-transform ${
+                                        isOn ? 'left-7' : 'left-1'
                                       }`}
                                     />
                                   )}

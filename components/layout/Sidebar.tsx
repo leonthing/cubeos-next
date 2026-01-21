@@ -4,6 +4,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/authStore';
@@ -17,6 +18,8 @@ import {
   ChevronDown,
   Building2,
   BookOpen,
+  Menu,
+  X,
 } from 'lucide-react';
 
 // 네비게이션 메뉴 항목
@@ -57,6 +60,7 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout, setCurrentLocation } = useAuthStore();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // 접근 가능한 농장 목록
   const farms = user?.aud
@@ -70,8 +74,25 @@ export default function Sidebar() {
     return user && item.roles.includes(user.currentRole);
   };
 
-  return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-0">
+  // 페이지 변경 시 모바일 메뉴 닫기
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
+
+  // 모바일 메뉴 열릴 때 스크롤 방지
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileOpen]);
+
+  const SidebarContent = () => (
+    <>
       {/* 로고 */}
       <div className="h-16 flex items-center px-6 border-b border-gray-200">
         <Link href="/dashboard" className="flex items-center space-x-2">
@@ -80,6 +101,13 @@ export default function Sidebar() {
           </div>
           <span className="text-xl font-bold text-gray-900">cubeOS</span>
         </Link>
+        {/* 모바일 닫기 버튼 */}
+        <button
+          onClick={() => setIsMobileOpen(false)}
+          className="ml-auto lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* 농장 선택 */}
@@ -163,6 +191,48 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* 모바일 헤더 바 */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-40 flex items-center px-4">
+        <button
+          onClick={() => setIsMobileOpen(true)}
+          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+        <Link href="/dashboard" className="flex items-center space-x-2 ml-3">
+          <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold">C</span>
+          </div>
+          <span className="text-lg font-bold text-gray-900">cubeOS</span>
+        </Link>
+      </div>
+
+      {/* 모바일 오버레이 */}
+      {isMobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* 모바일 사이드바 (슬라이드) */}
+      <aside
+        className={`lg:hidden fixed left-0 top-0 bottom-0 w-72 bg-white z-50 flex flex-col transform transition-transform duration-300 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* 데스크톱 사이드바 */}
+      <aside className="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-col h-screen fixed left-0 top-0">
+        <SidebarContent />
+      </aside>
+    </>
   );
 }

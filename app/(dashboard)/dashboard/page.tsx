@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/lib/authStore';
+import { useUIStore } from '@/lib/uiStore';
 import { useMqtt } from '@/hooks/useMqtt';
 import { siteApi, gatewayApi, logApi, deviceApi } from '@/lib/api';
 import { toast } from '@/lib/toastStore';
@@ -40,11 +41,14 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   MapPin,
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const { sitesCollapsed, toggleSites } = useUIStore();
   const farmId = user?.currentLocation || '';
 
   // TODO: API 응답 타입 정의 후 any 제거
@@ -340,12 +344,31 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* 데스크톱: 사이드바 사이트 목록 */}
-      <div className="hidden lg:block w-48 bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0">
-        <div className="p-3">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Sites
-          </h3>
+      {/* 데스크톱: 사이드바 사이트 목록 - 접기 가능 */}
+      <div
+        className={`hidden lg:flex flex-col bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0 transition-all duration-300 ${
+          sitesCollapsed ? 'w-12' : 'w-48'
+        }`}
+      >
+        <div className={`p-2 ${sitesCollapsed ? '' : 'p-3'}`}>
+          <div className="flex items-center justify-between mb-2">
+            {!sitesCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Sites
+              </h3>
+            )}
+            <button
+              onClick={toggleSites}
+              className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+              title={sitesCollapsed ? '펼치기' : '접기'}
+            >
+              {sitesCollapsed ? (
+                <ChevronRight className="w-4 h-4" />
+              ) : (
+                <ChevronLeft className="w-4 h-4" />
+              )}
+            </button>
+          </div>
           <div className="space-y-1">
             {sites.map((site) => {
               const isSelected = site.sid === selectedSite;
@@ -357,16 +380,25 @@ export default function DashboardPage() {
                 <button
                   key={site.sid}
                   onClick={() => setSelectedSite(site.sid)}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  title={sitesCollapsed ? `${site.name} (${temp !== null ? `${temp.toFixed(1)}°C` : '--'})` : undefined}
+                  className={`w-full text-left rounded-lg transition-colors ${
+                    sitesCollapsed ? 'p-2 flex items-center justify-center' : 'px-3 py-2.5'
+                  } ${
                     isSelected
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  <div className="font-medium text-sm">{site.name}</div>
-                  <div className={`text-xs mt-0.5 ${isSelected ? 'text-blue-500' : 'text-gray-400'}`}>
-                    {temp !== null ? `${temp.toFixed(1)}°C` : '--'} / {humid !== null ? `${humid.toFixed(0)}%` : '--'}
-                  </div>
+                  {sitesCollapsed ? (
+                    <span className="font-bold text-xs">{site.name?.charAt(0) || 'S'}</span>
+                  ) : (
+                    <>
+                      <div className="font-medium text-sm">{site.name}</div>
+                      <div className={`text-xs mt-0.5 ${isSelected ? 'text-blue-500' : 'text-gray-400'}`}>
+                        {temp !== null ? `${temp.toFixed(1)}°C` : '--'} / {humid !== null ? `${humid.toFixed(0)}%` : '--'}
+                      </div>
+                    </>
+                  )}
                 </button>
               );
             })}

@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/authStore';
+import { useUIStore } from '@/lib/uiStore';
 import Sidebar from '@/components/layout/Sidebar';
 import ToastContainer from '@/components/ui/Toast';
 
@@ -18,6 +19,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuthStore();
+  const { sidebarCollapsed } = useUIStore();
 
   // 인증 확인
   useEffect(() => {
@@ -44,7 +46,11 @@ export default function DashboardLayout({
       <Sidebar />
 
       {/* 메인 콘텐츠 */}
-      <main className="lg:ml-64 min-h-screen pt-14 lg:pt-0">
+      <main
+        className={`min-h-screen pt-14 lg:pt-0 transition-all duration-300 ${
+          sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+        }`}
+      >
         {children}
       </main>
 

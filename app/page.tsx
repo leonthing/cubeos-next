@@ -122,7 +122,7 @@ export default function IntroPage() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight">
-            <span className="text-white">Smart Farm</span>
+            <span className="text-white">Smart</span>
             <br />
             <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
               Control System

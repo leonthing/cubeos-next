@@ -432,40 +432,52 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 전체 평균 요약 - 심플 */}
-        <div className="bg-white border border-gray-200 rounded-xl p-3 md:p-4 mb-4 md:mb-6">
+        {/* 전체 평균 요약 - 컴팩트 */}
+        <div className="bg-gray-50 rounded-xl p-3 md:p-4 mb-4 md:mb-6">
           <div className="flex items-center justify-between mb-2 md:mb-3">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">전체 평균</span>
+            <span className="text-xs font-medium text-gray-500">전체 평균</span>
           </div>
           <div className="grid grid-cols-4 gap-2 md:gap-4">
             {/* 기온 */}
             <div className="text-center">
-              <span className="text-[10px] md:text-xs text-gray-400">기온</span>
-              <p className="text-base md:text-xl font-bold text-gray-800">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-xs">🌡️</span>
+                <span className="text-[10px] md:text-xs text-gray-500">기온</span>
+              </div>
+              <p className="text-base md:text-xl font-bold text-red-500">
                 {getAverage(totalSensorSummary, 'temperature')?.toFixed(1) ?? '--'}
                 <span className="text-[10px] md:text-xs font-normal text-gray-400">°C</span>
               </p>
             </div>
             {/* 습도 */}
             <div className="text-center">
-              <span className="text-[10px] md:text-xs text-gray-400">습도</span>
-              <p className="text-base md:text-xl font-bold text-gray-800">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-xs">💧</span>
+                <span className="text-[10px] md:text-xs text-gray-500">습도</span>
+              </div>
+              <p className="text-base md:text-xl font-bold text-blue-500">
                 {getAverage(totalSensorSummary, 'humidity')?.toFixed(1) ?? '--'}
                 <span className="text-[10px] md:text-xs font-normal text-gray-400">%</span>
               </p>
             </div>
             {/* CO2 */}
             <div className="text-center">
-              <span className="text-[10px] md:text-xs text-gray-400">CO2</span>
-              <p className="text-base md:text-xl font-bold text-gray-800">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-xs">🌿</span>
+                <span className="text-[10px] md:text-xs text-gray-500">CO2</span>
+              </div>
+              <p className="text-base md:text-xl font-bold text-emerald-500">
                 {getAverage(totalSensorSummary, 'co2')?.toFixed(0) ?? '--'}
                 <span className="text-[10px] md:text-xs font-normal text-gray-400">ppm</span>
               </p>
             </div>
             {/* 컨트롤러 */}
             <div className="text-center">
-              <span className="text-[10px] md:text-xs text-gray-400">컨트롤러</span>
-              <p className="text-base md:text-xl font-bold text-gray-800">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <Power className="w-3 h-3 text-violet-500" />
+                <span className="text-[10px] md:text-xs text-gray-500">컨트롤러</span>
+              </div>
+              <p className="text-base md:text-xl font-bold text-violet-500">
                 {totalControllerSummary.on}
                 <span className="text-[10px] md:text-xs font-normal text-gray-400">/{totalControllerSummary.total}</span>
               </p>
@@ -476,22 +488,22 @@ export default function DashboardPage() {
         {/* 선택된 사이트 상세 */}
         {selectedSite && selectedSiteInfo && (
           <>
-            {/* 사이트 헤더 - 심플 디자인 */}
-            <div className="bg-white border border-gray-200 rounded-xl md:rounded-2xl p-4 md:p-6 mb-6">
+            {/* 사이트 헤더 - 강조된 디자인 */}
+            <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 rounded-xl md:rounded-2xl p-4 md:p-6 mb-6 text-white shadow-lg">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 md:mb-5 gap-3">
                 <div className="flex items-center space-x-3 md:space-x-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <span className="font-bold text-gray-700 text-xl md:text-2xl">{selectedSiteInfo.name?.charAt(0) || 'S'}</span>
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 backdrop-blur rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/30">
+                    <span className="font-bold text-white text-xl md:text-2xl">{selectedSiteInfo.name?.charAt(0) || 'S'}</span>
                   </div>
                   <div className="min-w-0">
-                    <h2 className="text-lg md:text-2xl font-bold text-gray-900 truncate">
+                    <h2 className="text-lg md:text-2xl font-bold truncate">
                       {selectedSiteInfo.name}
                     </h2>
                     <div className="flex flex-wrap items-center gap-2 mt-1">
-                      <span className="bg-gray-100 text-gray-600 px-2 md:px-3 py-0.5 rounded-full text-xs md:text-sm font-medium">
+                      <span className="bg-white/20 px-2 md:px-3 py-0.5 rounded-full text-xs md:text-sm font-medium">
                         {selectedSiteInfo.stype || 'WORKING'}
                       </span>
-                      <span className="text-gray-400 text-xs md:text-sm">
+                      <span className="text-blue-100 text-xs md:text-sm">
                         센서 {selectedSiteSensors.length} · 컨트롤러 {selectedSiteControllers.length}
                       </span>
                     </div>
@@ -502,19 +514,19 @@ export default function DashboardPage() {
                   {selectedSiteInfo.camera && (
                     <button
                       onClick={() => setCameraModal({ open: true, url: selectedSiteInfo.camera, name: selectedSiteInfo.name })}
-                      className="flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-1.5 md:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl transition-colors text-gray-700"
+                      className="flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-1.5 md:py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-lg md:rounded-xl transition-colors border border-white/30"
                     >
                       <Video className="w-4 h-4 md:w-5 md:h-5" />
                       <span className="font-medium text-sm md:text-base">CAM</span>
                     </button>
                   )}
-                  <span className="bg-green-100 text-green-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium">
-                    정상
+                  <span className="bg-green-400 text-green-900 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-bold shadow-sm">
+                    ✓ 정상
                   </span>
                 </div>
               </div>
 
-              {/* 사이트 센서 요약 */}
+              {/* 사이트 센서 요약 - 반투명 카드 */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
                 {(() => {
                   const summary = getSiteSensorSummary(selectedSite);
@@ -526,14 +538,14 @@ export default function DashboardPage() {
                       : null;
 
                     return (
-                      <div key={type} className="bg-gray-50 rounded-lg md:rounded-xl p-2 md:p-3">
+                      <div key={type} className="bg-white/15 backdrop-blur rounded-lg md:rounded-xl p-2 md:p-3 border border-white/20">
                         <div className="flex items-center space-x-1 md:space-x-2 mb-1">
-                          <Icon className="w-3 h-3 md:w-4 md:h-4 text-gray-400" />
-                          <span className="text-[10px] md:text-xs text-gray-500">{config?.label || type}</span>
+                          <Icon className="w-3 h-3 md:w-4 md:h-4 text-white/80" />
+                          <span className="text-[10px] md:text-xs text-white/70">{config?.label || type}</span>
                         </div>
-                        <p className="text-lg md:text-2xl font-bold text-gray-800">
+                        <p className="text-lg md:text-2xl font-bold text-white">
                           {avg !== null ? (type === 'co2' ? avg.toFixed(0) : avg.toFixed(1)) : '--'}
-                          <span className="text-xs md:text-sm font-normal text-gray-400 ml-1">{config?.unit || ''}</span>
+                          <span className="text-xs md:text-sm text-white/60 ml-1">{config?.unit || ''}</span>
                         </p>
                       </div>
                     );
@@ -542,11 +554,11 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* 센서 게이트웨이 */}
+            {/* 센서 게이트웨이 - 개선된 디자인 */}
             {selectedSiteSensors.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 flex items-center">
-                  <Layers className="w-4 h-4 md:w-5 md:h-5 mr-2 text-gray-500" />
+                  <Layers className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-500" />
                   센서 게이트웨이
                 </h3>
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-5">
@@ -594,13 +606,23 @@ export default function DashboardPage() {
                                 : device.status
                               : '--';
 
+                            // 센서 타입별 배경색
+                            const bgColors: Record<string, string> = {
+                              temperature: 'bg-gradient-to-br from-red-50 to-orange-50 border-red-100',
+                              humidity: 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-100',
+                              co2: 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-100',
+                              ph: 'bg-gradient-to-br from-purple-50 to-violet-50 border-purple-100',
+                              ec: 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-100',
+                            };
+                            const bgColor = bgColors[normalizedType] || 'bg-gray-50 border-gray-100';
+
                             return (
-                              <div key={device.did} className="bg-gray-50 border border-gray-100 rounded-lg md:rounded-xl p-2.5 md:p-4">
+                              <div key={device.did} className={`${bgColor} border rounded-lg md:rounded-xl p-2.5 md:p-4`}>
                                 <div className="flex items-center space-x-1.5 md:space-x-2 mb-1.5 md:mb-2">
-                                  <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400" />
+                                  <Icon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${config?.color || 'text-gray-500'}`} />
                                   <span className="text-xs md:text-sm font-medium text-gray-600">{config?.label || device.dtype}</span>
                                 </div>
-                                <p className="text-xl md:text-2xl font-bold text-gray-800">
+                                <p className={`text-xl md:text-2xl font-bold ${config?.color || 'text-gray-700'}`}>
                                   {value}
                                   <span className="text-xs md:text-sm font-normal text-gray-400 ml-1">{config?.unit || ''}</span>
                                 </p>
@@ -618,19 +640,21 @@ export default function DashboardPage() {
             {/* 컨트롤러 게이트웨이 */}
             {selectedSiteControllers.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 flex items-center">
-                  <Power className="w-4 h-4 md:w-5 md:h-5 mr-2 text-gray-500" />
+                <h3 className="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4 flex items-center">
+                  <div className="w-7 h-7 md:w-8 md:h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-2 md:mr-3">
+                    <Power className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
+                  </div>
                   컨트롤러 게이트웨이
-                  <span className="ml-2 text-xs md:text-sm font-normal text-gray-400">
+                  <span className="ml-2 text-xs md:text-sm font-normal text-gray-500">
                     ({selectedSiteControllers.length}개)
                   </span>
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                   {selectedSiteControllers.map((gateway) => (
-                    <div key={gateway.gid} className="bg-white rounded-xl md:rounded-2xl border border-gray-200 overflow-hidden">
+                    <div key={gateway.gid} className="bg-white rounded-xl md:rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                       {/* 게이트웨이 헤더 */}
-                      <div className="bg-gray-50 border-b border-gray-100 px-3 md:px-4 py-2.5 md:py-3">
-                        <h4 className="font-semibold text-gray-700 text-xs md:text-sm truncate">
+                      <div className="bg-gradient-to-r from-purple-500 to-indigo-500 px-3 md:px-4 py-2.5 md:py-3">
+                        <h4 className="font-bold text-white uppercase text-xs md:text-sm tracking-wide truncate">
                           {gateway.name || gateway.gname || gateway.gid?.slice(0, 8) || 'Gateway'}
                         </h4>
                       </div>
@@ -649,9 +673,9 @@ export default function DashboardPage() {
                           return (
                             <div
                               key={device.did}
-                              className={`rounded-lg md:rounded-xl p-2.5 md:p-3 border transition-all ${
+                              className={`rounded-lg md:rounded-xl p-2.5 md:p-3 border-2 transition-all ${
                                 isOn
-                                  ? 'bg-green-50 border-green-200'
+                                  ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
                                   : 'bg-gray-50 border-gray-100'
                               }`}
                             >
@@ -668,7 +692,7 @@ export default function DashboardPage() {
                                       {config.label}
                                     </span>
                                     <span className={`text-[10px] md:text-xs font-medium ${isOn ? 'text-green-600' : 'text-gray-400'}`}>
-                                      {isOn ? 'ON' : 'OFF'}
+                                      {isOn ? '● 작동중' : '○ 정지'}
                                     </span>
                                   </div>
                                 </div>
@@ -676,15 +700,15 @@ export default function DashboardPage() {
                                 <button
                                   onClick={() => handleControl(gateway, device, !isOn)}
                                   disabled={isSwitchControlling}
-                                  className={`w-11 h-6 md:w-12 md:h-6 rounded-full relative transition-all overflow-hidden flex-shrink-0 ${
+                                  className={`w-11 h-6 md:w-12 md:h-6 rounded-full relative transition-all shadow-inner overflow-hidden flex-shrink-0 ${
                                     isOn ? 'bg-green-500' : 'bg-gray-300'
-                                  } ${isSwitchControlling ? 'opacity-50' : 'cursor-pointer'}`}
+                                  } ${isSwitchControlling ? 'opacity-50' : 'cursor-pointer hover:shadow-md'}`}
                                 >
                                   {isSwitchControlling ? (
                                     <Loader2 className="w-3 h-3 text-white absolute top-1.5 left-1/2 -translate-x-1/2 animate-spin" />
                                   ) : (
                                     <span
-                                      className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                                      className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all ${
                                         isOn ? 'left-6 md:left-7' : 'left-1'
                                       }`}
                                     />
@@ -692,18 +716,24 @@ export default function DashboardPage() {
                                 </button>
                               </div>
 
-                              {/* 하단: Auto/Manual 버튼 */}
+                              {/* 하단: Auto/Manual, Settings, Graph 버튼 */}
                               <div className="flex space-x-1.5 md:space-x-2">
                                 <button
                                   onClick={() => handleModeChange(gateway, device, !isAuto)}
                                   disabled={isModeControlling}
-                                  className={`flex-1 px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs font-medium rounded-md md:rounded-lg transition-all ${
+                                  className={`flex-1 px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs font-semibold rounded-md md:rounded-lg transition-all ${
                                     isAuto
-                                      ? 'bg-blue-500 text-white'
+                                      ? 'bg-blue-500 text-white shadow-sm'
                                       : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                                   } ${isModeControlling ? 'opacity-50' : 'cursor-pointer'}`}
                                 >
-                                  {isModeControlling ? '...' : isAuto ? 'Auto' : 'Manual'}
+                                  {isModeControlling ? '...' : isAuto ? '🤖 Auto' : '✋ Manual'}
+                                </button>
+                                <button className="px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-md md:rounded-lg hover:bg-gray-50 transition-colors">
+                                  ⚙️
+                                </button>
+                                <button className="px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-md md:rounded-lg hover:bg-gray-50 transition-colors">
+                                  📊
                                 </button>
                               </div>
                             </div>

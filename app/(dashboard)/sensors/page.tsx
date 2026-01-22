@@ -9,7 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/lib/authStore';
 import { useMqtt } from '@/hooks/useMqtt';
 import { siteApi, gatewayApi } from '@/lib/api';
-import { normalizeSensorType, SENSOR_CONFIG } from '@/lib/constants';
+import { normalizeSensorType, SENSOR_CONFIG, SENSOR_ORDER } from '@/lib/constants';
 import {
   LineChart,
   Line,
@@ -268,6 +268,11 @@ export default function SensorsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3 mb-4 md:mb-6">
             {Object.entries(siteSummary)
               .filter(([type]) => SENSOR_CONFIG[type]) // 알려진 센서 타입만
+              .sort(([a], [b]) => {
+                const orderA = SENSOR_ORDER.indexOf(a);
+                const orderB = SENSOR_ORDER.indexOf(b);
+                return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+              })
               .map(([type, data]) => {
                 const config = SENSOR_CONFIG[type];
                 const Icon = config.icon;
@@ -329,7 +334,13 @@ export default function SensorsPage() {
 
                   {/* 센서 타입별 카드 */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
-                    {Object.entries(sensorsByType).map(([type, devices]: [string, any]) => {
+                    {Object.entries(sensorsByType)
+                      .sort(([a], [b]) => {
+                        const orderA = SENSOR_ORDER.indexOf(a);
+                        const orderB = SENSOR_ORDER.indexOf(b);
+                        return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+                      })
+                      .map(([type, devices]: [string, any]) => {
                       const config = SENSOR_CONFIG[type];
                       const Icon = config?.icon || Activity;
                       const values = devices.map((d: any) => d.status).filter((v: any) => v != null);

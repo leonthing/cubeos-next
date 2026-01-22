@@ -73,6 +73,21 @@ export const CHART_COLORS: Record<string, string> = {
   water_level: '#06b6d4',
 };
 
+/**
+ * 센서 타입 표시 순서
+ * 기온 → 습도 → CO2 → 수온 → 조도 → pH → EC → 수위
+ */
+export const SENSOR_ORDER = [
+  'temperature',
+  'humidity',
+  'co2',
+  'water_temp',
+  'light',
+  'ph',
+  'ec',
+  'water_level',
+];
+
 // ==================================================
 // 컨트롤러 관련 설정
 // ==================================================

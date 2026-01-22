@@ -14,6 +14,7 @@ import { toast } from '@/lib/toastStore';
 import {
   normalizeSensorType,
   SENSOR_CONFIG,
+  SENSOR_ORDER,
   CONTROLLER_CONFIG,
   CHART_COLORS,
   PERIOD_OPTIONS,
@@ -189,10 +190,6 @@ export default function DashboardPage() {
       setSites(siteList);
       setSensorGateways(sensorRes.gateways || []);
       setControllerGateways(controllerRes.gateways || []);
-
-      if (siteList.length > 0 && !selectedSite) {
-        setSelectedSite(siteList[0].sid);
-      }
     } catch (error) {
       console.error('데이터 로드 실패:', error);
     } finally {
@@ -291,7 +288,7 @@ export default function DashboardPage() {
           <div className="flex items-center space-x-2">
             <MapPin className="w-4 h-4 text-blue-500" />
             <span className="font-medium text-gray-900">
-              {selectedSiteInfo?.name || '사이트 선택'}
+              {selectedSite ? selectedSiteInfo?.name : '전체'}
             </span>
             {selectedSiteInfo && (
               <span className="text-xs text-gray-500">
@@ -314,6 +311,23 @@ export default function DashboardPage() {
         {/* 모바일 사이트 목록 드롭다운 */}
         {isSitesOpen && (
           <div className="border-t border-gray-100 bg-gray-50 max-h-64 overflow-y-auto">
+            {/* 전체 옵션 */}
+            <button
+              onClick={() => {
+                setSelectedSite(null);
+                setIsSitesOpen(false);
+              }}
+              className={`w-full text-left px-4 py-2.5 border-b border-gray-100 ${
+                selectedSite === null
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <div className="font-medium text-sm">전체</div>
+              <div className={`text-xs mt-0.5 ${selectedSite === null ? 'text-blue-500' : 'text-gray-400'}`}>
+                {sites.length}개 사이트
+              </div>
+            </button>
             {sites.map((site) => {
               const isSelected = site.sid === selectedSite;
               const summary = getSiteSensorSummary(site.sid);
@@ -370,6 +384,29 @@ export default function DashboardPage() {
             </button>
           </div>
           <div className="space-y-1">
+            {/* 전체 옵션 */}
+            <button
+              onClick={() => setSelectedSite(null)}
+              title={sitesCollapsed ? '전체' : undefined}
+              className={`w-full text-left rounded-lg transition-colors ${
+                sitesCollapsed ? 'px-1.5 py-2 flex items-center justify-center' : 'px-3 py-2.5'
+              } ${
+                selectedSite === null
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              {sitesCollapsed ? (
+                <span className="font-bold text-[10px]">ALL</span>
+              ) : (
+                <>
+                  <div className="font-medium text-sm">전체</div>
+                  <div className={`text-xs mt-0.5 ${selectedSite === null ? 'text-blue-500' : 'text-gray-400'}`}>
+                    {sites.length}개 사이트
+                  </div>
+                </>
+              )}
+            </button>
             {sites.map((site) => {
               const isSelected = site.sid === selectedSite;
               const summary = getSiteSensorSummary(site.sid);
@@ -485,6 +522,94 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* 전체 사이트 현황 (selectedSite가 null일 때) */}
+        {!selectedSite && (
+          <div className="mb-6">
+            <h2 className="text-base md:text-lg font-bold text-gray-800 mb-4">Sites</h2>
+            {(() => {
+              // 사이트를 stype별로 그룹핑
+              const sitesByType = sites.reduce((acc: Record<string, any[]>, site) => {
+                const type = site.stype || 'WORKING';
+                if (!acc[type]) acc[type] = [];
+                acc[type].push(site);
+                return acc;
+              }, {});
+
+              // stype 순서 정의
+              const typeOrder = ['WORKING', 'GERMINATION', 'GROWING'];
+              const sortedTypes = Object.keys(sitesByType).sort((a, b) => {
+                const orderA = typeOrder.indexOf(a);
+                const orderB = typeOrder.indexOf(b);
+                return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+              });
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {sortedTypes.map((stype) => (
+                    <div key={stype}>
+                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                        {stype}
+                      </h3>
+                      <div className="space-y-2">
+                        {sitesByType[stype].map((site) => {
+                          const summary = getSiteSensorSummary(site.sid);
+                          const temp = getAverage(summary, 'temperature');
+                          const humid = getAverage(summary, 'humidity');
+                          const co2 = getAverage(summary, 'co2');
+                          const siteControllers = controllerGateways.filter((gw) => gw.sid === site.sid);
+                          const totalDevices = siteControllers.reduce((acc, gw) => acc + (gw.deviceList?.length || 0), 0);
+                          const onDevices = siteControllers.reduce(
+                            (acc, gw) => acc + (gw.deviceList?.filter((d: any) => d.status === 1).length || 0),
+                            0
+                          );
+
+                          return (
+                            <button
+                              key={site.sid}
+                              onClick={() => setSelectedSite(site.sid)}
+                              className="w-full bg-white border border-gray-200 rounded-xl p-3 md:p-4 hover:border-blue-300 hover:shadow-md transition-all text-left"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-bold text-gray-900">{site.name}</span>
+                                  {site.camera && (
+                                    <Video className="w-4 h-4 text-red-500" />
+                                  )}
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  {totalDevices > 0 && (
+                                    <span className="text-[10px] text-gray-400">
+                                      ⚡ {onDevices}/{totalDevices}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              {site.description && (
+                                <p className="text-xs text-gray-500 mb-2 truncate">{site.description}</p>
+                              )}
+                              <div className="flex items-center space-x-3 text-xs">
+                                <span className="text-red-500 font-medium">
+                                  🌡️ {temp !== null ? `${temp.toFixed(1)}°C` : '--'}
+                                </span>
+                                <span className="text-blue-500 font-medium">
+                                  💧 {humid !== null ? `${humid.toFixed(0)}%` : '--'}
+                                </span>
+                                <span className="text-emerald-500 font-medium">
+                                  🌿 {co2 !== null ? `${co2.toFixed(0)}` : '--'}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
         {/* 선택된 사이트 상세 */}
         {selectedSite && selectedSiteInfo && (
           <>
@@ -530,7 +655,13 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
                 {(() => {
                   const summary = getSiteSensorSummary(selectedSite);
-                  return Object.entries(summary).map(([type, data]) => {
+                  return Object.entries(summary)
+                    .sort(([a], [b]) => {
+                      const orderA = SENSOR_ORDER.indexOf(a);
+                      const orderB = SENSOR_ORDER.indexOf(b);
+                      return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+                    })
+                    .map(([type, data]) => {
                     const config = SENSOR_CONFIG[type];
                     const Icon = config?.icon || Activity;
                     const avg = data.values.length > 0
@@ -596,7 +727,14 @@ export default function DashboardPage() {
                       {/* 센서 값 그리드 */}
                       <div className="p-3 md:p-4">
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
-                          {gateway.deviceList?.map((device: any) => {
+                          {gateway.deviceList
+                            ?.slice()
+                            .sort((a: any, b: any) => {
+                              const orderA = SENSOR_ORDER.indexOf(normalizeSensorType(a.dtype));
+                              const orderB = SENSOR_ORDER.indexOf(normalizeSensorType(b.dtype));
+                              return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+                            })
+                            .map((device: any) => {
                             const normalizedType = normalizeSensorType(device.dtype);
                             const config = SENSOR_CONFIG[normalizedType];
                             const Icon = config?.icon || Activity;

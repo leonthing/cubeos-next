@@ -50,7 +50,7 @@ import {
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const { sitesCollapsed, toggleSites, favoriteFarms, toggleFavoriteFarm } = useUIStore();
+  const { sitesCollapsed, toggleSites, favoriteFarms, toggleFavoriteFarm, favoriteSites, toggleFavoriteSite } = useUIStore();
   const farmId = user?.currentLocation || '';
   const isFarmFavorite = favoriteFarms.includes(farmId);
 
@@ -550,75 +550,130 @@ export default function DashboardPage() {
                 return acc;
               }, {});
 
-              // stype 순서 정의
-              const typeOrder = ['WORKING', 'GERMINATION', 'GROWING'];
-              const sortedTypes = Object.keys(sitesByType).sort((a, b) => {
-                const orderA = typeOrder.indexOf(a);
-                const orderB = typeOrder.indexOf(b);
-                return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+              // 각 타입 내에서 즐겨찾기 사이트를 맨 위로 정렬
+              Object.keys(sitesByType).forEach((type) => {
+                sitesByType[type].sort((a, b) => {
+                  const aFav = favoriteSites.includes(a.sid);
+                  const bFav = favoriteSites.includes(b.sid);
+                  if (aFav && !bFav) return -1;
+                  if (!aFav && bFav) return 1;
+                  return (a.name || '').localeCompare(b.name || '');
+                });
               });
 
-              return (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {sortedTypes.map((stype) => (
-                    <div key={stype}>
-                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                        {stype}
-                      </h3>
-                      <div className="space-y-2">
-                        {sitesByType[stype].map((site) => {
-                          const summary = getSiteSensorSummary(site.sid);
-                          const temp = getAverage(summary, 'temperature');
-                          const humid = getAverage(summary, 'humidity');
-                          const co2 = getAverage(summary, 'co2');
-                          const siteControllers = controllerGateways.filter((gw) => gw.sid === site.sid);
-                          const totalDevices = siteControllers.reduce((acc, gw) => acc + (gw.deviceList?.length || 0), 0);
-                          const onDevices = siteControllers.reduce(
-                            (acc, gw) => acc + (gw.deviceList?.filter((d: any) => d.status === 1).length || 0),
-                            0
-                          );
+              // 사이트 카드 렌더링 함수
+              const renderSiteCard = (site: any, compact = false) => {
+                const summary = getSiteSensorSummary(site.sid);
+                const temp = getAverage(summary, 'temperature');
+                const humid = getAverage(summary, 'humidity');
+                const co2 = getAverage(summary, 'co2');
+                const siteControllers = controllerGateways.filter((gw) => gw.sid === site.sid);
+                const totalDevices = siteControllers.reduce((acc, gw) => acc + (gw.deviceList?.length || 0), 0);
+                const onDevices = siteControllers.reduce(
+                  (acc, gw) => acc + (gw.deviceList?.filter((d: any) => d.status === 1).length || 0),
+                  0
+                );
+                const isFavorite = favoriteSites.includes(site.sid);
 
-                          return (
-                            <button
-                              key={site.sid}
-                              onClick={() => setSelectedSite(site.sid)}
-                              className="w-full bg-white border border-gray-200 rounded-xl p-3 md:p-4 hover:border-blue-300 hover:shadow-md transition-all text-left"
-                            >
-                              <div className="flex items-start justify-between mb-2">
-                                <div className="flex items-center space-x-2">
-                                  <span className="font-bold text-gray-900">{site.name}</span>
-                                  {site.camera && (
-                                    <Video className="w-4 h-4 text-red-500" />
-                                  )}
-                                </div>
-                                <div className="flex items-center space-x-1">
-                                  {totalDevices > 0 && (
-                                    <span className="text-[10px] text-gray-400">
-                                      ⚡ {onDevices}/{totalDevices}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              {site.description && (
-                                <p className="text-xs text-gray-500 mb-2 truncate">{site.description}</p>
-                              )}
-                              <div className="flex items-center space-x-3 text-xs">
-                                <span className="text-red-500 font-medium">
-                                  🌡️ {temp !== null ? `${temp.toFixed(1)}°C` : '--'}
-                                </span>
-                                <span className="text-blue-500 font-medium">
-                                  💧 {humid !== null ? `${humid.toFixed(0)}%` : '--'}
-                                </span>
-                                <span className="text-emerald-500 font-medium">
-                                  🌿 {co2 !== null ? `${co2.toFixed(0)}` : '--'}
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        })}
+                return (
+                  <div
+                    key={site.sid}
+                    className={`bg-white border border-gray-200 rounded-xl ${compact ? 'p-2 md:p-3' : 'p-3 md:p-4'} hover:border-blue-300 hover:shadow-md transition-all`}
+                  >
+                    <div className="flex items-start justify-between mb-1.5">
+                      <button
+                        onClick={() => setSelectedSite(site.sid)}
+                        className="flex items-center space-x-2 text-left flex-1 min-w-0"
+                      >
+                        <span className={`font-bold text-gray-900 truncate ${compact ? 'text-sm' : ''}`}>{site.name}</span>
+                        {site.camera && (
+                          <Video className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-red-500 flex-shrink-0`} />
+                        )}
+                      </button>
+                      <div className="flex items-center space-x-1 flex-shrink-0">
+                        {totalDevices > 0 && (
+                          <span className="text-[10px] text-gray-400">
+                            ⚡ {onDevices}/{totalDevices}
+                          </span>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavoriteSite(site.sid);
+                          }}
+                          className="p-0.5 hover:bg-gray-100 rounded transition-colors"
+                          title={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                        >
+                          <Star
+                            className={`${compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} ${
+                              isFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
+                            }`}
+                          />
+                        </button>
                       </div>
                     </div>
-                  ))}
+                    <button
+                      onClick={() => setSelectedSite(site.sid)}
+                      className="w-full text-left"
+                    >
+                      {site.description && !compact && (
+                        <p className="text-xs text-gray-500 mb-1.5 truncate">{site.description}</p>
+                      )}
+                      <div className={`flex items-center space-x-2 ${compact ? 'text-[10px]' : 'text-xs'}`}>
+                        <span className="text-red-500 font-medium">
+                          🌡️ {temp !== null ? `${temp.toFixed(1)}°` : '--'}
+                        </span>
+                        <span className="text-blue-500 font-medium">
+                          💧 {humid !== null ? `${humid.toFixed(0)}%` : '--'}
+                        </span>
+                        <span className="text-emerald-500 font-medium">
+                          🌿 {co2 !== null ? `${co2.toFixed(0)}` : '--'}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                );
+              };
+
+              return (
+                <div className="flex flex-col lg:flex-row gap-6">
+                  {/* 왼쪽: WORKING + GERMINATION */}
+                  <div className="lg:w-1/4 space-y-6">
+                    {/* WORKING */}
+                    {sitesByType['WORKING'] && sitesByType['WORKING'].length > 0 && (
+                      <div>
+                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                          WORKING
+                        </h3>
+                        <div className="space-y-2">
+                          {sitesByType['WORKING'].map((site) => renderSiteCard(site))}
+                        </div>
+                      </div>
+                    )}
+                    {/* GERMINATION */}
+                    {sitesByType['GERMINATION'] && sitesByType['GERMINATION'].length > 0 && (
+                      <div>
+                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                          GERMINATION
+                        </h3>
+                        <div className="space-y-2">
+                          {sitesByType['GERMINATION'].map((site) => renderSiteCard(site))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 오른쪽: GROWING (2열 그리드) */}
+                  {sitesByType['GROWING'] && sitesByType['GROWING'].length > 0 && (
+                    <div className="lg:flex-1">
+                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                        GROWING
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                        {sitesByType['GROWING'].map((site) => renderSiteCard(site, true))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })()}

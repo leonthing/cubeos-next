@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/authStore';
@@ -23,7 +23,6 @@ import {
   BookOpen,
   Menu,
   X,
-  Star,
 } from 'lucide-react';
 
 // 네비게이션 메뉴 항목
@@ -64,24 +63,20 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout, setCurrentLocation } = useAuthStore();
-  const { sidebarCollapsed, toggleSidebar, favoriteFarms, toggleFavoriteFarm } = useUIStore();
+  const { sidebarCollapsed, toggleSidebar, favoriteFarms } = useUIStore();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isFarmDropdownOpen, setIsFarmDropdownOpen] = useState(false);
 
-  // 접근 가능한 농장 목록
+  // 접근 가능한 농장 목록 (즐겨찾기 농장 맨 위로)
   const farms = user?.aud
     ?.filter((a) => a.includes('cube-farm-'))
     .map((a) => a.split('-')[2])
-    .sort() || [];
-
-  // 즐겨찾기 농장을 맨 위로 정렬
-  const sortedFarms = [...farms].sort((a, b) => {
-    const aFav = favoriteFarms.includes(a);
-    const bFav = favoriteFarms.includes(b);
-    if (aFav && !bFav) return -1;
-    if (!aFav && bFav) return 1;
-    return a.localeCompare(b);
-  });
+    .sort((a, b) => {
+      const aFav = favoriteFarms.includes(a);
+      const bFav = favoriteFarms.includes(b);
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+      return a.localeCompare(b);
+    }) || [];
 
   // 메뉴 접근 권한 확인
   const hasAccess = (item: typeof menuItems[0]) => {
@@ -89,31 +84,10 @@ export default function Sidebar() {
     return user && item.roles.includes(user.currentRole);
   };
 
-  // 농장 드롭다운 ref
-  const farmDropdownRef = useRef<HTMLDivElement>(null);
-
-  // 페이지 변경 시 모바일 메뉴 및 드롭다운 닫기
+  // 페이지 변경 시 모바일 메뉴 닫기
   useEffect(() => {
     setIsMobileOpen(false);
-    setIsFarmDropdownOpen(false);
   }, [pathname]);
-
-  // 드롭다운 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (farmDropdownRef.current && !farmDropdownRef.current.contains(event.target as Node)) {
-        setIsFarmDropdownOpen(false);
-      }
-    };
-
-    if (isFarmDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isFarmDropdownOpen]);
 
   // 모바일 메뉴 열릴 때 스크롤 방지
   useEffect(() => {
@@ -152,61 +126,19 @@ export default function Sidebar() {
           <label className="text-xs font-medium text-gray-500 mb-1 block">
             현재 농장
           </label>
-          <div className="relative" ref={farmDropdownRef}>
-            <button
-              onClick={() => setIsFarmDropdownOpen(!isFarmDropdownOpen)}
-              className="w-full flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div className="relative">
+            <select
+              value={user?.currentLocation || ''}
+              onChange={(e) => setCurrentLocation(e.target.value)}
+              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <div className="flex items-center space-x-2">
-                {favoriteFarms.includes(user?.currentLocation || '') && (
-                  <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                )}
-                <span>{user?.currentLocation?.toUpperCase()} 농장</span>
-              </div>
-              <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isFarmDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {isFarmDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-                {sortedFarms.map((farm) => {
-                  const isFavorite = favoriteFarms.includes(farm);
-                  const isSelected = farm === user?.currentLocation;
-                  return (
-                    <div
-                      key={farm}
-                      className={`flex items-center justify-between px-3 py-2 hover:bg-gray-50 ${
-                        isSelected ? 'bg-blue-50' : ''
-                      }`}
-                    >
-                      <button
-                        onClick={() => {
-                          setCurrentLocation(farm);
-                          setIsFarmDropdownOpen(false);
-                        }}
-                        className={`flex-1 text-left text-sm font-medium ${
-                          isSelected ? 'text-blue-700' : 'text-gray-700'
-                        }`}
-                      >
-                        {farm.toUpperCase()} 농장
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavoriteFarm(farm);
-                        }}
-                        className="p-1 hover:bg-gray-200 rounded transition-colors"
-                        title={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-                      >
-                        <Star
-                          className={`w-4 h-4 ${
-                            isFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+              {farms.map((farm) => (
+                <option key={farm} value={farm}>
+                  {favoriteFarms.includes(farm) ? '⭐ ' : ''}{farm.toUpperCase()} 농장
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
           </div>
         </div>
       )}
@@ -342,61 +274,19 @@ export default function Sidebar() {
             <label className="text-xs font-medium text-gray-500 mb-1 block">
               현재 농장
             </label>
-            <div className="relative" ref={farmDropdownRef}>
-              <button
-                onClick={() => setIsFarmDropdownOpen(!isFarmDropdownOpen)}
-                className="w-full flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <div className="relative">
+              <select
+                value={user?.currentLocation || ''}
+                onChange={(e) => setCurrentLocation(e.target.value)}
+                className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <div className="flex items-center space-x-2">
-                  {favoriteFarms.includes(user?.currentLocation || '') && (
-                    <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                  )}
-                  <span>{user?.currentLocation?.toUpperCase()} 농장</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isFarmDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {isFarmDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-                  {sortedFarms.map((farm) => {
-                    const isFavorite = favoriteFarms.includes(farm);
-                    const isSelected = farm === user?.currentLocation;
-                    return (
-                      <div
-                        key={farm}
-                        className={`flex items-center justify-between px-3 py-2 hover:bg-gray-50 ${
-                          isSelected ? 'bg-blue-50' : ''
-                        }`}
-                      >
-                        <button
-                          onClick={() => {
-                            setCurrentLocation(farm);
-                            setIsFarmDropdownOpen(false);
-                          }}
-                          className={`flex-1 text-left text-sm font-medium ${
-                            isSelected ? 'text-blue-700' : 'text-gray-700'
-                          }`}
-                        >
-                          {farm.toUpperCase()} 농장
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavoriteFarm(farm);
-                          }}
-                          className="p-1 hover:bg-gray-200 rounded transition-colors"
-                          title={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-                        >
-                          <Star
-                            className={`w-4 h-4 ${
-                              isFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                {farms.map((farm) => (
+                  <option key={farm} value={farm}>
+                    {favoriteFarms.includes(farm) ? '⭐ ' : ''}{farm.toUpperCase()} 농장
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
             </div>
           </div>
         )}

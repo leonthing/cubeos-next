@@ -45,12 +45,14 @@ import {
   ChevronLeft,
   ChevronRight,
   MapPin,
+  Star,
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const { sitesCollapsed, toggleSites } = useUIStore();
+  const { sitesCollapsed, toggleSites, favoriteFarms, toggleFavoriteFarm } = useUIStore();
   const farmId = user?.currentLocation || '';
+  const isFarmFavorite = favoriteFarms.includes(farmId);
 
   // TODO: API 응답 타입 정의 후 any 제거
   const [sites, setSites] = useState<any[]>([]);
@@ -449,7 +451,20 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-4 md:mb-6">
           <div>
             <h1 className="text-lg md:text-2xl font-bold text-gray-900">대시보드</h1>
-            <p className="text-gray-500 text-xs md:text-sm mt-0.5 md:mt-1">{farmId.toUpperCase()} 농장 현황</p>
+            <div className="flex items-center space-x-2 mt-0.5 md:mt-1">
+              <p className="text-gray-500 text-xs md:text-sm">{farmId.toUpperCase()} 농장 현황</p>
+              <button
+                onClick={() => toggleFavoriteFarm(farmId)}
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
+                title={isFarmFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+              >
+                <Star
+                  className={`w-4 h-4 ${
+                    isFarmFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2 md:space-x-3">

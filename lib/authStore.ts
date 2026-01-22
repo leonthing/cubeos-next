@@ -29,23 +29,51 @@ interface AuthState {
 }
 
 /**
+ * localStorage에서 즐겨찾기 농장 목록 가져오기
+ */
+function getFavoriteFarms(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem('cubeos-ui-state');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed.state?.favoriteFarms || [];
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return [];
+}
+
+/**
  * JWT 토큰에서 사용자 정보 추출
  */
 function parseUserFromToken(token: string): User {
   const payload = jwtDecode<JWTPayload>(token);
-  
+
   // 권한에서 현재 위치와 역할 파싱
   let currentLocation = '';
   let currentRole: UserRole = 'user';
 
   // 마스터 계정인 경우
   if (payload.authorities.some(auth => auth === 'cube-farm-master')) {
-    // aud에서 첫 번째 농장 선택
-    const farms = payload.aud
+    // aud에서 농장 목록 추출
+    const farmCodes = payload.aud
       .filter(a => a.includes('cube-farm-'))
-      .sort();
-    if (farms.length > 0) {
-      currentLocation = farms[0].split('-')[2];
+      .map(a => a.split('-')[2]);
+
+    // 즐겨찾기 농장을 맨 위로 정렬
+    const favoriteFarms = getFavoriteFarms();
+    const sortedFarms = farmCodes.sort((a, b) => {
+      const aFav = favoriteFarms.includes(a);
+      const bFav = favoriteFarms.includes(b);
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+      return a.localeCompare(b);
+    });
+
+    if (sortedFarms.length > 0) {
+      currentLocation = sortedFarms[0];
     }
     currentRole = 'master';
   } else {

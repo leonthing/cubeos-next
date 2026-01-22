@@ -162,6 +162,40 @@ export const siteApi = {
     );
     return response.data;
   },
+
+  /**
+   * 사이트 정보 업데이트
+   */
+  updateSite: async (farmId: string, data: { sid: string; sname: string; stype?: string }) => {
+    const params = new URLSearchParams();
+    params.append('sid', data.sid);
+    params.append('sname', data.sname);
+    if (data.stype) {
+      params.append('stype', data.stype);
+    }
+
+    const response = await api.post(
+      `/farm/${FARM_PATH}/site/updateSite`,
+      params.toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+    return response.data;
+  },
+
+  /**
+   * 사이트 삭제
+   */
+  deleteSite: async (farmId: string, siteId: string) => {
+    const params = new URLSearchParams();
+    params.append('sid', siteId);
+
+    const response = await api.post(
+      `/farm/${FARM_PATH}/site/deleteSite`,
+      params.toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+    return response.data;
+  },
 };
 
 // ==================================================
@@ -202,6 +236,51 @@ export const gatewayApi = {
     const response = await api.get(`/farm/${FARM_PATH}/gateway/getGatewayBySiteId`, {
       params: { sid: siteId },
     });
+    return response.data;
+  },
+
+  /**
+   * 게이트웨이 Blink (LED 깜빡임)
+   */
+  blinkGateway: async (farmId: string, gatewayId: string) => {
+    const params = new URLSearchParams();
+    params.append('gid', gatewayId);
+
+    const response = await api.post(
+      `/farm/${FARM_PATH}/gateway/blink`,
+      params.toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+    return response.data;
+  },
+
+  /**
+   * 게이트웨이 삭제
+   */
+  deleteGateway: async (farmId: string, gatewayId: string) => {
+    const params = new URLSearchParams();
+    params.append('gid', gatewayId);
+
+    const response = await api.post(
+      `/farm/${FARM_PATH}/gateway/deleteGateway`,
+      params.toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+    return response.data;
+  },
+
+  /**
+   * 센서 캘리브레이션
+   */
+  calibrateSensor: async (farmId: string, gatewayId: string) => {
+    const params = new URLSearchParams();
+    params.append('gid', gatewayId);
+
+    const response = await api.post(
+      `/farm/${FARM_PATH}/gateway/calibration`,
+      params.toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
     return response.data;
   },
 };
@@ -467,6 +546,68 @@ export const recipeApi = {
    */
   getSiteTypes: async () => {
     const response = await api.get(`/recipe/${API_ENV}/siteType/getSiteTypes`);
+    return response.data;
+  },
+};
+
+// ==================================================
+// 펌웨어 API (OTA)
+// ==================================================
+
+export const firmwareApi = {
+  /**
+   * 펌웨어 목록 조회
+   */
+  getFirmwares: async () => {
+    const response = await api.get(`/farm/${FARM_PATH}/firmware/getFirmwares`);
+    return response.data;
+  },
+
+  /**
+   * 펌웨어 업데이트 (게이트웨이에 적용)
+   */
+  updateFirmware: async () => {
+    const response = await api.post(
+      `/farm/${FARM_PATH}/firmware/updateFirmware`,
+      {},
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    return response.data;
+  },
+
+  /**
+   * 펌웨어 업로드 (새 펌웨어 등록)
+   */
+  uploadFirmware: async (data: {
+    file: File;
+    ftype: string;
+    version: string;
+  }) => {
+    const formData = new FormData();
+    formData.append('file', data.file);
+    formData.append('ftype', data.ftype);
+    formData.append('version', data.version);
+
+    const response = await api.post(
+      `/farm/${FARM_PATH}/firmware/uploadFirmware`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data;
+  },
+
+  /**
+   * 펌웨어 삭제
+   */
+  deleteFirmware: async (fid: string) => {
+    const params = new URLSearchParams();
+    params.append('fid', fid);
+
+    const response = await api.post(
+      `/farm/${FARM_PATH}/firmware/deleteFirmware`,
+      params.toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
     return response.data;
   },
 };

@@ -153,28 +153,28 @@ export default function LogsPage() {
 
   // 센서 로그 테이블
   const renderSensorLogs = () => (
-    <table className="w-full">
+    <table className="w-full min-w-[500px]">
       <thead>
         <tr className="bg-gray-50">
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">시간</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">장치</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">타입</th>
-          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">값</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">시간</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">장치</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">타입</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-right text-[10px] lg:text-xs font-medium text-gray-500 uppercase">값</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-100">
         {logs.map((log, index) => (
           <tr key={index} className="hover:bg-gray-50">
-            <td className="px-4 py-3 text-sm text-gray-900">
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-900 whitespace-nowrap">
               {log.timestamp
-                ? format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss')
+                ? format(new Date(log.timestamp), 'MM-dd HH:mm')
                 : log.res_date || '-'}
             </td>
-            <td className="px-4 py-3 text-sm text-gray-700">{log.dname || log.device_name || '-'}</td>
-            <td className="px-4 py-3 text-sm text-gray-700">
-              <span className="badge badge-info">{log.dtype || log.sensor_type || '-'}</span>
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-700 truncate max-w-[100px] lg:max-w-none">{log.dname || log.device_name || '-'}</td>
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-700">
+              <span className="badge badge-info text-[10px] lg:text-xs">{log.dtype || log.sensor_type || '-'}</span>
             </td>
-            <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-right font-medium text-gray-900">
               {log.sensor_val ?? log.value ?? '-'}
             </td>
           </tr>
@@ -185,33 +185,33 @@ export default function LogsPage() {
 
   // 제어 로그 테이블
   const renderControlLogs = () => (
-    <table className="w-full">
+    <table className="w-full min-w-[550px]">
       <thead>
         <tr className="bg-gray-50">
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">시간</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">장치</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">액션</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">사용자</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">결과</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">시간</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">장치</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">액션</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">사용자</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">결과</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-100">
         {logs.map((log, index) => (
           <tr key={index} className="hover:bg-gray-50">
-            <td className="px-4 py-3 text-sm text-gray-900">
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-900 whitespace-nowrap">
               {log.timestamp
-                ? format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss')
+                ? format(new Date(log.timestamp), 'MM-dd HH:mm')
                 : log.created_at || '-'}
             </td>
-            <td className="px-4 py-3 text-sm text-gray-700">{log.dname || log.device_name || '-'}</td>
-            <td className="px-4 py-3 text-sm text-gray-700">
-              <span className={`badge ${log.action === 'ON' || log.action === 'on' ? 'badge-success' : 'badge-info'}`}>
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-700 truncate max-w-[80px] lg:max-w-none">{log.dname || log.device_name || '-'}</td>
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-700">
+              <span className={`badge text-[10px] lg:text-xs ${log.action === 'ON' || log.action === 'on' ? 'badge-success' : 'badge-info'}`}>
                 {log.action || '-'}
               </span>
             </td>
-            <td className="px-4 py-3 text-sm text-gray-700">{log.username || log.user || '-'}</td>
-            <td className="px-4 py-3 text-sm">
-              <span className={`badge ${log.success ? 'badge-success' : 'badge-danger'}`}>
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-700 hidden sm:table-cell">{log.username || log.user || '-'}</td>
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm">
+              <span className={`badge text-[10px] lg:text-xs ${log.success ? 'badge-success' : 'badge-danger'}`}>
                 {log.success ? '성공' : '실패'}
               </span>
             </td>
@@ -223,25 +223,25 @@ export default function LogsPage() {
 
   // 알림 로그 테이블
   const renderAlertLogs = () => (
-    <table className="w-full">
+    <table className="w-full min-w-[450px]">
       <thead>
         <tr className="bg-gray-50">
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">시간</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">타입</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">메시지</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">시간</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">타입</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">메시지</th>
+          <th className="px-2 lg:px-4 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-500 uppercase">상태</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-100">
         {logs.map((log, index) => (
           <tr key={index} className="hover:bg-gray-50">
-            <td className="px-4 py-3 text-sm text-gray-900">
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-900 whitespace-nowrap">
               {log.timestamp
-                ? format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss')
+                ? format(new Date(log.timestamp), 'MM-dd HH:mm')
                 : log.created_at || '-'}
             </td>
-            <td className="px-4 py-3 text-sm">
-              <span className={`badge ${
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm">
+              <span className={`badge text-[10px] lg:text-xs ${
                 log.level === 'error' || log.level === 'critical'
                   ? 'badge-danger'
                   : log.level === 'warning'
@@ -251,10 +251,10 @@ export default function LogsPage() {
                 {log.level || log.type || '-'}
               </span>
             </td>
-            <td className="px-4 py-3 text-sm text-gray-700">{log.message || '-'}</td>
-            <td className="px-4 py-3 text-sm">
-              <span className={`badge ${log.resolved ? 'badge-success' : 'badge-warning'}`}>
-                {log.resolved ? '해결됨' : '미해결'}
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm text-gray-700 truncate max-w-[120px] lg:max-w-none">{log.message || '-'}</td>
+            <td className="px-2 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm">
+              <span className={`badge text-[10px] lg:text-xs ${log.resolved ? 'badge-success' : 'badge-warning'}`}>
+                {log.resolved ? '해결' : '미해결'}
               </span>
             </td>
           </tr>
@@ -264,24 +264,24 @@ export default function LogsPage() {
   );
 
   return (
-    <div className="p-8">
+    <div className="p-4 lg:p-8">
       {/* 헤더 */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4 lg:mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">로그</h1>
-          <p className="text-gray-500 mt-1">시스템 로그 조회 및 다운로드</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">로그</h1>
+          <p className="text-sm lg:text-base text-gray-500 mt-1">시스템 로그 조회 및 다운로드</p>
         </div>
       </div>
 
-      {/* 로그 타입 탭 */}
-      <div className="flex space-x-2 mb-6">
+      {/* 로그 타입 탭 - 모바일에서 가로 스크롤 */}
+      <div className="flex overflow-x-auto gap-2 mb-4 lg:mb-6 pb-2 -mx-4 px-4 lg:mx-0 lg:px-0">
         {LOG_TYPES.map((type) => {
           const Icon = type.icon;
           return (
             <button
               key={type.id}
               onClick={() => handleLogTypeChange(type.id as LogType)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              className={`flex items-center space-x-2 px-3 lg:px-4 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0 text-sm lg:text-base ${
                 logType === type.id
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -295,44 +295,44 @@ export default function LogsPage() {
       </div>
 
       {/* 필터 */}
-      <div className="card mb-6">
-        <div className="flex flex-wrap items-end gap-4">
+      <div className="card mb-4 lg:mb-6">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-3 lg:gap-4">
           {/* 시작일 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="col-span-1">
+            <label className="block text-xs lg:text-sm font-medium text-gray-700 mb-1">
               시작일
             </label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Calendar className="absolute left-2 lg:left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="input pl-10"
+                className="input pl-8 lg:pl-10 text-sm w-full"
               />
             </div>
           </div>
 
           {/* 종료일 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="col-span-1">
+            <label className="block text-xs lg:text-sm font-medium text-gray-700 mb-1">
               종료일
             </label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Calendar className="absolute left-2 lg:left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="input pl-10"
+                className="input pl-8 lg:pl-10 text-sm w-full"
               />
             </div>
           </div>
 
           {/* 장치 ID (센서 로그만) */}
           {logType === 'sensor' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="col-span-2 sm:col-span-1">
+              <label className="block text-xs lg:text-sm font-medium text-gray-700 mb-1">
                 장치 ID
               </label>
               <input
@@ -340,61 +340,64 @@ export default function LogsPage() {
                 value={deviceId}
                 onChange={(e) => setDeviceId(e.target.value)}
                 placeholder="옵션"
-                className="input w-40"
+                className="input text-sm w-full sm:w-32 lg:w-40"
               />
             </div>
           )}
 
-          {/* 검색 버튼 */}
-          <button
-            onClick={handleSearch}
-            className="btn btn-primary flex items-center space-x-2"
-          >
-            <Search className="w-4 h-4" />
-            <span>검색</span>
-          </button>
-
-          {/* 새로고침 */}
-          <button
-            onClick={loadLogs}
-            className="btn btn-secondary flex items-center space-x-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span>새로고침</span>
-          </button>
-
-          {/* 다운로드 (센서 로그만) */}
-          {logType === 'sensor' && (
+          {/* 버튼들 */}
+          <div className="col-span-2 flex flex-wrap gap-2">
+            {/* 검색 버튼 */}
             <button
-              onClick={handleDownload}
-              disabled={downloading || !deviceId}
-              className="btn btn-secondary flex items-center space-x-2 ml-auto"
+              onClick={handleSearch}
+              className="btn btn-primary flex items-center space-x-2 text-sm flex-1 sm:flex-none justify-center"
             >
-              <Download className={`w-4 h-4 ${downloading ? 'animate-bounce' : ''}`} />
-              <span>{downloading ? '다운로드 중...' : 'CSV 다운로드'}</span>
+              <Search className="w-4 h-4" />
+              <span>검색</span>
             </button>
-          )}
+
+            {/* 새로고침 */}
+            <button
+              onClick={loadLogs}
+              className="btn btn-secondary flex items-center space-x-2 text-sm flex-1 sm:flex-none justify-center"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span className="hidden sm:inline">새로고침</span>
+            </button>
+
+            {/* 다운로드 (센서 로그만) */}
+            {logType === 'sensor' && (
+              <button
+                onClick={handleDownload}
+                disabled={downloading || !deviceId}
+                className="btn btn-secondary flex items-center space-x-2 text-sm sm:ml-auto"
+              >
+                <Download className={`w-4 h-4 ${downloading ? 'animate-bounce' : ''}`} />
+                <span className="hidden sm:inline">{downloading ? '다운로드 중...' : 'CSV'}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* 로그 테이블 */}
       <div className="card overflow-hidden">
         {/* 테이블 헤더 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-100">
           <div className="flex items-center space-x-2">
-            <FileText className="w-5 h-5 text-gray-400" />
-            <span className="font-medium text-gray-900">
+            <FileText className="w-4 lg:w-5 h-4 lg:h-5 text-gray-400" />
+            <span className="font-medium text-gray-900 text-sm lg:text-base">
               {LOG_TYPES.find((t) => t.id === logType)?.label}
             </span>
-            <span className="text-sm text-gray-500">
-              (총 {totalElements.toLocaleString()}건)
+            <span className="text-xs lg:text-sm text-gray-500">
+              ({totalElements.toLocaleString()}건)
             </span>
           </div>
         </div>
 
         {/* 로딩 */}
         {loading && (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex items-center justify-center py-12 lg:py-16">
             <div className="spinner w-8 h-8"></div>
           </div>
         )}
@@ -410,18 +413,18 @@ export default function LogsPage() {
 
         {/* 데이터 없음 */}
         {!loading && logs.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-            <AlertCircle className="w-12 h-12 text-gray-300 mb-3" />
-            <p>조회된 로그가 없습니다</p>
-            <p className="text-sm mt-1">검색 조건을 변경해보세요</p>
+          <div className="flex flex-col items-center justify-center py-12 lg:py-16 text-gray-500">
+            <AlertCircle className="w-10 lg:w-12 h-10 lg:h-12 text-gray-300 mb-3" />
+            <p className="text-sm lg:text-base">조회된 로그가 없습니다</p>
+            <p className="text-xs lg:text-sm mt-1">검색 조건을 변경해보세요</p>
           </div>
         )}
 
         {/* 페이지네이션 */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-            <p className="text-sm text-gray-500">
-              {page + 1} / {totalPages} 페이지
+          <div className="flex items-center justify-between px-4 lg:px-6 py-3 lg:py-4 border-t border-gray-100">
+            <p className="text-xs lg:text-sm text-gray-500">
+              {page + 1} / {totalPages}
             </p>
             <div className="flex items-center space-x-2">
               <button

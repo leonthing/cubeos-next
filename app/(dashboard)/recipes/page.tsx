@@ -100,43 +100,43 @@ export default function RecipesPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 lg:p-8">
         <div className="flex items-center justify-center h-64">
-          <div className="spinner w-12 h-12"></div>
+          <div className="spinner w-10 lg:w-12 h-10 lg:h-12"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 lg:p-8">
       {/* 헤더 */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 lg:mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">레시피 관리</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">레시피 관리</h1>
+          <p className="text-sm lg:text-base text-gray-500 mt-1">
             재배 환경 레시피 설정 ({recipes.length}개)
           </p>
         </div>
       </div>
 
       {/* 검색 및 필터 */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 mb-4 lg:mb-6">
+        <div className="relative flex-1 sm:max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 lg:w-5 h-4 lg:h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="레시피 검색 (코드, 설명, 작물명)..."
+            placeholder="레시피 검색..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 lg:pl-10 pr-4 py-2 text-sm lg:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 lg:px-4 py-2 text-sm lg:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">모든 카테고리</option>
           {categories.map((cat) => (
@@ -160,26 +160,41 @@ export default function RecipesPage() {
                 className="flex items-center justify-between cursor-pointer"
                 onClick={() => setExpandedRecipe(isExpanded ? null : recipe.recipeId)}
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                    <Leaf className="w-6 h-6 text-green-600" />
+                <div className="flex items-center space-x-3 lg:space-x-4 min-w-0 flex-1">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Leaf className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
                   </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold text-gray-900">{recipe.recipeCode}</h3>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-sm lg:text-base text-gray-900 truncate">{recipe.recipeCode}</h3>
                       {recipe.recipeCategory && (
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                        <span className="px-1.5 lg:px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] lg:text-xs whitespace-nowrap">
                           {recipe.recipeCategory.name}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">
+                    <p className="text-xs lg:text-sm text-gray-500 mt-0.5 line-clamp-1">
                       {recipe.description || '설명 없음'}
                     </p>
+                    {/* 모바일에서 보이는 추가 정보 */}
+                    <div className="flex sm:hidden items-center gap-3 mt-1 text-xs text-gray-500">
+                      {recipe.plant?.seedName && (
+                        <span className="flex items-center">
+                          <Leaf className="w-3 h-3 mr-0.5 text-green-500" />
+                          {recipe.plant.seedName}
+                        </span>
+                      )}
+                      {totalDays > 0 && (
+                        <span className="flex items-center">
+                          <Clock className="w-3 h-3 mr-0.5 text-blue-500" />
+                          {totalDays}일
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
                   <div className="hidden sm:flex items-center space-x-4 text-sm text-gray-500">
                     {recipe.plant?.seedName && (
                       <span className="flex items-center">
@@ -204,75 +219,75 @@ export default function RecipesPage() {
 
               {/* 상세 정보 */}
               {isExpanded && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="mt-3 lg:mt-4 pt-3 lg:pt-4 border-t border-gray-100">
                   {/* 기본 정보 */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Tag className="w-4 h-4 text-gray-500" />
-                        <span className="text-xs text-gray-500">레시피 코드</span>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4 mb-3 lg:mb-4">
+                    <div className="bg-gray-50 rounded-lg p-2 lg:p-3">
+                      <div className="flex items-center space-x-1 lg:space-x-2 mb-1">
+                        <Tag className="w-3 lg:w-4 h-3 lg:h-4 text-gray-500" />
+                        <span className="text-[10px] lg:text-xs text-gray-500">레시피 코드</span>
                       </div>
-                      <p className="font-medium text-gray-900">{recipe.recipeCode}</p>
+                      <p className="font-medium text-xs lg:text-base text-gray-900 truncate">{recipe.recipeCode}</p>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Leaf className="w-4 h-4 text-green-500" />
-                        <span className="text-xs text-gray-500">작물</span>
+                    <div className="bg-gray-50 rounded-lg p-2 lg:p-3">
+                      <div className="flex items-center space-x-1 lg:space-x-2 mb-1">
+                        <Leaf className="w-3 lg:w-4 h-3 lg:h-4 text-green-500" />
+                        <span className="text-[10px] lg:text-xs text-gray-500">작물</span>
                       </div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-xs lg:text-base text-gray-900 truncate">
                         {recipe.plant?.seedName || '-'}
                       </p>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Layers className="w-4 h-4 text-blue-500" />
-                        <span className="text-xs text-gray-500">사이트 타입</span>
+                    <div className="bg-gray-50 rounded-lg p-2 lg:p-3">
+                      <div className="flex items-center space-x-1 lg:space-x-2 mb-1">
+                        <Layers className="w-3 lg:w-4 h-3 lg:h-4 text-blue-500" />
+                        <span className="text-[10px] lg:text-xs text-gray-500">사이트 타입</span>
                       </div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-xs lg:text-base text-gray-900 truncate">
                         {recipe.siteType?.description || recipe.siteType?.name || '-'}
                       </p>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Clock className="w-4 h-4 text-purple-500" />
-                        <span className="text-xs text-gray-500">재배 기간</span>
+                    <div className="bg-gray-50 rounded-lg p-2 lg:p-3">
+                      <div className="flex items-center space-x-1 lg:space-x-2 mb-1">
+                        <Clock className="w-3 lg:w-4 h-3 lg:h-4 text-purple-500" />
+                        <span className="text-[10px] lg:text-xs text-gray-500">재배 기간</span>
                       </div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-xs lg:text-base text-gray-900">
                         {totalDays > 0 ? `${totalDays}일` : '-'}
                       </p>
                     </div>
                   </div>
 
                   {/* 추가 정보 */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="text-xs text-gray-500">작성자</span>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4 mb-3 lg:mb-4">
+                    <div className="bg-gray-50 rounded-lg p-2 lg:p-3">
+                      <div className="flex items-center space-x-1 lg:space-x-2 mb-1">
+                        <User className="w-3 lg:w-4 h-3 lg:h-4 text-gray-500" />
+                        <span className="text-[10px] lg:text-xs text-gray-500">작성자</span>
                       </div>
-                      <p className="font-medium text-gray-900">{recipe.drafterId || '-'}</p>
+                      <p className="font-medium text-xs lg:text-base text-gray-900 truncate">{recipe.drafterId || '-'}</p>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span className="text-xs text-gray-500">등록일</span>
+                    <div className="bg-gray-50 rounded-lg p-2 lg:p-3">
+                      <div className="flex items-center space-x-1 lg:space-x-2 mb-1">
+                        <Calendar className="w-3 lg:w-4 h-3 lg:h-4 text-gray-500" />
+                        <span className="text-[10px] lg:text-xs text-gray-500">등록일</span>
                       </div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-xs lg:text-base text-gray-900">
                         {recipe.date ? new Date(recipe.date).toLocaleDateString('ko-KR') : '-'}
                       </p>
                     </div>
 
                     {recipe.plant?.vendor && (
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <BookOpen className="w-4 h-4 text-gray-500" />
-                          <span className="text-xs text-gray-500">벤더</span>
+                      <div className="bg-gray-50 rounded-lg p-2 lg:p-3">
+                        <div className="flex items-center space-x-1 lg:space-x-2 mb-1">
+                          <BookOpen className="w-3 lg:w-4 h-3 lg:h-4 text-gray-500" />
+                          <span className="text-[10px] lg:text-xs text-gray-500">벤더</span>
                         </div>
-                        <p className="font-medium text-gray-900">{recipe.plant.vendor.name}</p>
+                        <p className="font-medium text-xs lg:text-base text-gray-900 truncate">{recipe.plant.vendor.name}</p>
                       </div>
                     )}
                   </div>
@@ -280,11 +295,11 @@ export default function RecipesPage() {
                   {/* 시퀀스 정보 */}
                   {recipe.sequences && recipe.sequences.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">
+                      <h4 className="text-xs lg:text-sm font-medium text-gray-700 mb-2 lg:mb-3">
                         재배 시퀀스 ({recipe.sequences.length}단계)
                       </h4>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs border-collapse min-w-[1600px]">
+                      <div className="overflow-x-auto -mx-2 lg:mx-0 px-2 lg:px-0">
+                        <table className="w-full text-[10px] lg:text-xs border-collapse min-w-[1200px] lg:min-w-[1600px]">
                           <thead>
                             <tr className="bg-gray-100">
                               <th rowSpan={2} className="px-2 py-2 text-center font-medium text-gray-600 border whitespace-nowrap">SEQUENCE<br/>Number</th>
@@ -414,8 +429,8 @@ export default function RecipesPage() {
 
                   {/* 설명 */}
                   {recipe.description && (
-                    <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-                      <p className="text-sm text-gray-700">{recipe.description}</p>
+                    <div className="mt-3 lg:mt-4 p-2 lg:p-3 bg-yellow-50 rounded-lg">
+                      <p className="text-xs lg:text-sm text-gray-700">{recipe.description}</p>
                     </div>
                   )}
                 </div>
@@ -425,9 +440,9 @@ export default function RecipesPage() {
         })}
 
         {filteredRecipes.length === 0 && (
-          <div className="text-center py-16 text-gray-500">
-            <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-lg">
+          <div className="text-center py-12 lg:py-16 text-gray-500">
+            <BookOpen className="w-12 lg:w-16 h-12 lg:h-16 mx-auto mb-3 lg:mb-4 text-gray-300" />
+            <p className="text-base lg:text-lg">
               {searchTerm || categoryFilter !== 'all'
                 ? '검색 결과가 없습니다'
                 : '등록된 레시피가 없습니다'}

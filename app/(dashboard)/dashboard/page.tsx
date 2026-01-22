@@ -46,13 +46,44 @@ import {
   ChevronRight,
   MapPin,
   Star,
+  GripVertical,
 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const { sitesCollapsed, toggleSites, favoriteFarms, toggleFavoriteFarm, favoriteSites, toggleFavoriteSite } = useUIStore();
+  const { sitesCollapsed, toggleSites, favoriteFarms, toggleFavoriteFarm, favoriteSites, toggleFavoriteSite, siteOrder, setSiteOrder } = useUIStore();
   const farmId = user?.currentLocation || '';
   const isFarmFavorite = favoriteFarms.includes(farmId);
+
+  // 드래그 앤 드롭 센서 설정
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // TODO: API 응답 타입 정의 후 any 제거
   const [sites, setSites] = useState<any[]>([]);
@@ -539,145 +570,20 @@ export default function DashboardPage() {
 
         {/* 전체 사이트 현황 (selectedSite가 null일 때) */}
         {!selectedSite && (
-          <div className="mb-6">
-            <h2 className="text-base md:text-lg font-bold text-gray-800 mb-4">Sites</h2>
-            {(() => {
-              // 사이트를 stype별로 그룹핑
-              const sitesByType = sites.reduce((acc: Record<string, any[]>, site) => {
-                const type = site.stype || 'WORKING';
-                if (!acc[type]) acc[type] = [];
-                acc[type].push(site);
-                return acc;
-              }, {});
-
-              // 각 타입 내에서 즐겨찾기 사이트를 맨 위로 정렬
-              Object.keys(sitesByType).forEach((type) => {
-                sitesByType[type].sort((a, b) => {
-                  const aFav = favoriteSites.includes(a.sid);
-                  const bFav = favoriteSites.includes(b.sid);
-                  if (aFav && !bFav) return -1;
-                  if (!aFav && bFav) return 1;
-                  return (a.name || '').localeCompare(b.name || '');
-                });
-              });
-
-              // 사이트 카드 렌더링 함수
-              const renderSiteCard = (site: any, compact = false) => {
-                const summary = getSiteSensorSummary(site.sid);
-                const temp = getAverage(summary, 'temperature');
-                const humid = getAverage(summary, 'humidity');
-                const co2 = getAverage(summary, 'co2');
-                const siteControllers = controllerGateways.filter((gw) => gw.sid === site.sid);
-                const totalDevices = siteControllers.reduce((acc, gw) => acc + (gw.deviceList?.length || 0), 0);
-                const onDevices = siteControllers.reduce(
-                  (acc, gw) => acc + (gw.deviceList?.filter((d: any) => d.status === 1).length || 0),
-                  0
-                );
-                const isFavorite = favoriteSites.includes(site.sid);
-
-                return (
-                  <div
-                    key={site.sid}
-                    className={`bg-white border border-gray-200 rounded-xl ${compact ? 'p-2 md:p-3' : 'p-3 md:p-4'} hover:border-blue-300 hover:shadow-md transition-all`}
-                  >
-                    <div className="flex items-start justify-between mb-1.5">
-                      <button
-                        onClick={() => setSelectedSite(site.sid)}
-                        className="flex items-center space-x-2 text-left flex-1 min-w-0"
-                      >
-                        <span className={`font-bold text-gray-900 truncate ${compact ? 'text-sm' : ''}`}>{site.name}</span>
-                        {site.camera && (
-                          <Video className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-red-500 flex-shrink-0`} />
-                        )}
-                      </button>
-                      <div className="flex items-center space-x-1 flex-shrink-0">
-                        {totalDevices > 0 && (
-                          <span className="text-[10px] text-gray-400">
-                            ⚡ {onDevices}/{totalDevices}
-                          </span>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavoriteSite(site.sid);
-                          }}
-                          className="p-0.5 hover:bg-gray-100 rounded transition-colors"
-                          title={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-                        >
-                          <Star
-                            className={`${compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} ${
-                              isFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSelectedSite(site.sid)}
-                      className="w-full text-left"
-                    >
-                      {site.description && !compact && (
-                        <p className="text-xs text-gray-500 mb-1.5 truncate">{site.description}</p>
-                      )}
-                      <div className={`flex items-center space-x-2 ${compact ? 'text-[10px]' : 'text-xs'}`}>
-                        <span className="text-red-500 font-medium">
-                          🌡️ {temp !== null ? `${temp.toFixed(1)}°` : '--'}
-                        </span>
-                        <span className="text-blue-500 font-medium">
-                          💧 {humid !== null ? `${humid.toFixed(0)}%` : '--'}
-                        </span>
-                        <span className="text-emerald-500 font-medium">
-                          🌿 {co2 !== null ? `${co2.toFixed(0)}` : '--'}
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-                );
-              };
-
-              return (
-                <div className="flex flex-col lg:flex-row gap-6">
-                  {/* 왼쪽: WORKING + GERMINATION */}
-                  <div className="lg:w-1/4 space-y-6">
-                    {/* WORKING */}
-                    {sitesByType['WORKING'] && sitesByType['WORKING'].length > 0 && (
-                      <div>
-                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                          WORKING
-                        </h3>
-                        <div className="space-y-2">
-                          {sitesByType['WORKING'].map((site) => renderSiteCard(site))}
-                        </div>
-                      </div>
-                    )}
-                    {/* GERMINATION */}
-                    {sitesByType['GERMINATION'] && sitesByType['GERMINATION'].length > 0 && (
-                      <div>
-                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                          GERMINATION
-                        </h3>
-                        <div className="space-y-2">
-                          {sitesByType['GERMINATION'].map((site) => renderSiteCard(site))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 오른쪽: GROWING (2열 그리드) */}
-                  {sitesByType['GROWING'] && sitesByType['GROWING'].length > 0 && (
-                    <div className="lg:flex-1">
-                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                        GROWING
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {sitesByType['GROWING'].map((site) => renderSiteCard(site))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
+          <SitesOverview
+            sites={sites}
+            farmId={farmId}
+            siteOrder={siteOrder}
+            setSiteOrder={setSiteOrder}
+            favoriteSites={favoriteSites}
+            toggleFavoriteSite={toggleFavoriteSite}
+            getSiteSensorSummary={getSiteSensorSummary}
+            getAverage={getAverage}
+            controllerGateways={controllerGateways}
+            setSelectedSite={setSelectedSite}
+            sensors={sensors}
+            onOpenCamera={(url, name) => setCameraModal({ open: true, url, name })}
+          />
         )}
 
         {/* 선택된 사이트 상세 */}
@@ -982,6 +888,500 @@ export default function DashboardPage() {
           onClose={() => setGraphModal({ open: false, gateway: null, name: '' })}
         />
       )}
+    </div>
+  );
+}
+
+// SortableSiteCard 컴포넌트
+interface SortableSiteCardProps {
+  site: any;
+  isFavorite: boolean;
+  toggleFavorite: (id: string) => void;
+  getSiteSensorSummary: (siteId: string) => Record<string, { values: number[]; count: number }>;
+  getAverage: (summary: Record<string, { values: number[]; count: number }>, type: string) => number | null;
+  controllerGateways: any[];
+  setSelectedSite: (siteId: string) => void;
+  onOpenCamera?: (url: string, name: string) => void;
+  desktopOrder?: number;
+}
+
+function SortableSiteCard({
+  site,
+  isFavorite,
+  toggleFavorite,
+  getSiteSensorSummary,
+  getAverage,
+  controllerGateways,
+  setSelectedSite,
+  onOpenCamera,
+  desktopOrder,
+}: SortableSiteCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: site.sid });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const summary = getSiteSensorSummary(site.sid);
+  const temp = getAverage(summary, 'temperature');
+  const humid = getAverage(summary, 'humidity');
+  const co2 = getAverage(summary, 'co2');
+
+  const siteControllers = controllerGateways.filter((gw) => gw.sid === site.sid);
+  const controllerOn = siteControllers.reduce(
+    (acc, gw) => acc + (gw.deviceList?.filter((d: any) => d.status === 1).length || 0),
+    0
+  );
+  const controllerTotal = siteControllers.reduce(
+    (acc, gw) => acc + (gw.deviceList?.length || 0),
+    0
+  );
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`bg-white rounded-xl hover:shadow-md transition-all cursor-pointer p-3 ${
+        isFavorite
+          ? 'border-2 border-yellow-400 bg-yellow-50/50'
+          : 'border border-gray-200 hover:border-blue-300'
+      } ${isDragging ? 'shadow-lg ring-2 ring-blue-300' : ''}`}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center space-x-2 flex-1 min-w-0">
+          {/* 드래그 핸들 */}
+          <button
+            {...attributes}
+            {...listeners}
+            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded cursor-grab active:cursor-grabbing"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+          <div
+            className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0"
+            onClick={() => setSelectedSite(site.sid)}
+          >
+            <span className="text-white font-bold text-sm">
+              {site.name?.charAt(0) || 'S'}
+            </span>
+          </div>
+          <div className="min-w-0" onClick={() => setSelectedSite(site.sid)}>
+            <h4 className="font-semibold text-gray-900 truncate text-sm">
+              {site.name}
+            </h4>
+            <span className="text-xs text-gray-400">{site.stype || 'WORKING'}</span>
+          </div>
+        </div>
+        <div className="flex items-center space-x-1 flex-shrink-0">
+          {/* 카메라 버튼 */}
+          {site.camera && onOpenCamera && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenCamera(site.camera, site.name);
+              }}
+              className="p-1 hover:bg-blue-100 rounded transition-colors"
+              title="카메라 보기"
+            >
+              <Video className="w-4 h-4 text-blue-500" />
+            </button>
+          )}
+          {/* 즐겨찾기 버튼 */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(site.sid);
+            }}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            <Star
+              className={`w-4 h-4 ${
+                isFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+      <div
+        className="grid grid-cols-3 gap-2"
+        onClick={() => setSelectedSite(site.sid)}
+      >
+        <div className="text-center">
+          <span className="text-xs text-gray-400">기온</span>
+          <p className="font-bold text-red-500 text-sm">
+            {temp !== null ? `${temp.toFixed(1)}°` : '--'}
+          </p>
+        </div>
+        <div className="text-center">
+          <span className="text-xs text-gray-400">습도</span>
+          <p className="font-bold text-blue-500 text-sm">
+            {humid !== null ? `${humid.toFixed(0)}%` : '--'}
+          </p>
+        </div>
+        <div className="text-center">
+          <span className="text-xs text-gray-400">CO2</span>
+          <p className="font-bold text-emerald-500 text-sm">
+            {co2 !== null ? `${co2.toFixed(0)}` : '--'}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// SitesOverview 컴포넌트
+interface SitesOverviewProps {
+  sites: any[];
+  farmId: string;
+  siteOrder: Record<string, Record<string, string[]>>;
+  setSiteOrder: (farmId: string, stype: string, siteIds: string[]) => void;
+  favoriteSites: string[];
+  toggleFavoriteSite: (siteId: string) => void;
+  getSiteSensorSummary: (siteId: string) => Record<string, { values: number[]; count: number }>;
+  getAverage: (summary: Record<string, { values: number[]; count: number }>, type: string) => number | null;
+  controllerGateways: any[];
+  setSelectedSite: (siteId: string) => void;
+  sensors: ReturnType<typeof useSensors>;
+  onOpenCamera: (url: string, name: string) => void;
+}
+
+// E1000 GROWING 기본 순서 생성 (모바일: 왼쪽열 먼저, 그 다음 오른쪽열)
+function getE1000GrowingDefaultOrder(sitesInGroup: any[]): number[] {
+  // 모바일 순서: [1, 2, 3, ..., 13, 28, 27, 26, ..., 14]
+  const leftColumn = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  const rightColumn = [28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14];
+
+  return [...leftColumn, ...rightColumn];
+}
+
+// E1000 GROWING 데스크탑 order 계산 (2열 그리드용)
+function getE1000GrowingDesktopOrder(siteNumber: number): number {
+  const leftColumn = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  const rightColumn = [28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14];
+
+  const leftIndex = leftColumn.indexOf(siteNumber);
+  if (leftIndex !== -1) {
+    return leftIndex * 2; // 0, 2, 4, 6, ...
+  }
+
+  const rightIndex = rightColumn.indexOf(siteNumber);
+  if (rightIndex !== -1) {
+    return rightIndex * 2 + 1; // 1, 3, 5, 7, ...
+  }
+
+  return 999;
+}
+
+// 사이트 이름에서 숫자 추출
+function extractSiteNumber(name: string): number {
+  const match = name?.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 999;
+}
+
+function SitesOverview({
+  sites,
+  farmId,
+  siteOrder,
+  setSiteOrder,
+  favoriteSites,
+  toggleFavoriteSite,
+  getSiteSensorSummary,
+  getAverage,
+  controllerGateways,
+  setSelectedSite,
+  sensors,
+  onOpenCamera,
+}: SitesOverviewProps) {
+  // 사이트를 타입별로 그룹화
+  const groupedSites = sites.reduce((acc, site) => {
+    const stype = site.stype || 'WORKING';
+    if (!acc[stype]) acc[stype] = [];
+    acc[stype].push(site);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  // 각 그룹 내에서 정렬 (즐겨찾기는 순서에 영향 없음 - 원래 위치 유지)
+  const getSortedSites = (stype: string, sitesInGroup: any[]) => {
+    const savedOrder = siteOrder[farmId]?.[stype] || [];
+
+    // E1000 GROWING 기본 순서 적용 (저장된 순서가 없을 때)
+    if (farmId.toLowerCase() === 'e1000' && stype === 'GROWING' && savedOrder.length === 0) {
+      const defaultNumberOrder = getE1000GrowingDefaultOrder(sitesInGroup);
+
+      return [...sitesInGroup].sort((a, b) => {
+        // E1000 기본 순서 적용 (즐겨찾기 무관)
+        const aNum = extractSiteNumber(a.name);
+        const bNum = extractSiteNumber(b.name);
+        const aIndex = defaultNumberOrder.indexOf(aNum);
+        const bIndex = defaultNumberOrder.indexOf(bNum);
+
+        if (aIndex !== -1 && bIndex !== -1) {
+          return aIndex - bIndex;
+        }
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+
+        return aNum - bNum;
+      });
+    }
+
+    return [...sitesInGroup].sort((a, b) => {
+      // 저장된 순서 적용 (즐겨찾기 무관)
+      const aIndex = savedOrder.indexOf(a.sid);
+      const bIndex = savedOrder.indexOf(b.sid);
+
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+
+      // 기본: 이름순
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  };
+
+  // 드래그 종료 핸들러
+  const handleDragEnd = (stype: string) => (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const sitesInGroup = getSortedSites(stype, groupedSites[stype] || []);
+      const oldIndex = sitesInGroup.findIndex((s) => s.sid === active.id);
+      const newIndex = sitesInGroup.findIndex((s) => s.sid === over.id);
+
+      const newOrder = arrayMove(sitesInGroup, oldIndex, newIndex);
+      setSiteOrder(farmId, stype, newOrder.map((s) => s.sid));
+    }
+  };
+
+  const stypeLabels: Record<string, string> = {
+    WORKING: 'Working',
+    GERMINATION: 'Germination',
+    GROWING: 'Growing',
+  };
+
+  // 즐겨찾기 사이트 (모든 그룹에서 - 바로가기용)
+  const allFavoriteSites = sites.filter((site: any) => favoriteSites.includes(site.sid));
+
+  // 각 그룹 사이트 (즐겨찾기 포함 - 원래 자리 유지)
+  const workingSites = getSortedSites('WORKING', groupedSites['WORKING'] || []);
+  const germinationSites = getSortedSites('GERMINATION', groupedSites['GERMINATION'] || []);
+  const growingSites = getSortedSites('GROWING', groupedSites['GROWING'] || []);
+
+  // E1000 GROWING 좌/우 열 분리 (반응형 레이아웃용)
+  const isE1000 = farmId.toLowerCase() === 'e1000';
+  const leftColumnNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  const growingLeftColumn = isE1000
+    ? growingSites.filter((s: any) => leftColumnNumbers.includes(extractSiteNumber(s.name)))
+    : [];
+  const growingRightColumn = isE1000
+    ? growingSites.filter((s: any) => !leftColumnNumbers.includes(extractSiteNumber(s.name)))
+    : [];
+
+  return (
+    <div className="space-y-6">
+      {/* Favorites 그룹 (맨 위) */}
+      {allFavoriteSites.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500 mr-2" />
+            Favorites ({allFavoriteSites.length})
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {allFavoriteSites.map((site: any) => (
+              <SortableSiteCard
+                key={site.sid}
+                site={site}
+                isFavorite={true}
+                toggleFavorite={toggleFavoriteSite}
+                getSiteSensorSummary={getSiteSensorSummary}
+                getAverage={getAverage}
+                controllerGateways={controllerGateways}
+                setSelectedSite={setSelectedSite}
+                onOpenCamera={onOpenCamera}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 기존 레이아웃: 2열 그리드 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 왼쪽 열: GROWING (우선) */}
+      {growingSites.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+            {stypeLabels['GROWING']} ({growingSites.length})
+          </h3>
+          {/* E1000: 모바일에서 왼쪽열 먼저, 그 다음 오른쪽열 */}
+          {isE1000 ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd('GROWING')}
+            >
+              <SortableContext
+                items={growingSites.map((s) => s.sid)}
+                strategy={rectSortingStrategy}
+              >
+                {/* 모바일: 세로 2개 그룹, 데스크탑: 가로 2열 */}
+                <div className="flex flex-col lg:flex-row gap-3">
+                  {/* 왼쪽 열 (G1-G13) */}
+                  <div className="flex-1 space-y-3 lg:space-y-0 lg:grid lg:grid-cols-1 lg:gap-3">
+                    {growingLeftColumn.map((site: any) => (
+                      <SortableSiteCard
+                        key={site.sid}
+                        site={site}
+                        isFavorite={favoriteSites.includes(site.sid)}
+                        toggleFavorite={toggleFavoriteSite}
+                        getSiteSensorSummary={getSiteSensorSummary}
+                        getAverage={getAverage}
+                        controllerGateways={controllerGateways}
+                        setSelectedSite={setSelectedSite}
+                        onOpenCamera={onOpenCamera}
+                      />
+                    ))}
+                  </div>
+                  {/* 오른쪽 열 (G28-G14) */}
+                  <div className="flex-1 space-y-3 lg:space-y-0 lg:grid lg:grid-cols-1 lg:gap-3">
+                    {growingRightColumn.map((site: any) => (
+                      <SortableSiteCard
+                        key={site.sid}
+                        site={site}
+                        isFavorite={favoriteSites.includes(site.sid)}
+                        toggleFavorite={toggleFavoriteSite}
+                        getSiteSensorSummary={getSiteSensorSummary}
+                        getAverage={getAverage}
+                        controllerGateways={controllerGateways}
+                        setSelectedSite={setSelectedSite}
+                        onOpenCamera={onOpenCamera}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </SortableContext>
+            </DndContext>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd('GROWING')}
+            >
+              <SortableContext
+                items={growingSites.map((s) => s.sid)}
+                strategy={rectSortingStrategy}
+              >
+                {/* 일반 농장: 모바일 1열, 데스크탑 2열 */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {growingSites.map((site: any) => (
+                    <SortableSiteCard
+                      key={site.sid}
+                      site={site}
+                      isFavorite={favoriteSites.includes(site.sid)}
+                      toggleFavorite={toggleFavoriteSite}
+                      getSiteSensorSummary={getSiteSensorSummary}
+                      getAverage={getAverage}
+                      controllerGateways={controllerGateways}
+                      setSelectedSite={setSelectedSite}
+                      onOpenCamera={onOpenCamera}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </div>
+      )}
+
+      {/* 오른쪽 열: WORKING + GERMINATION */}
+      <div className="space-y-6">
+        {/* WORKING */}
+        {workingSites.length > 0 && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+              <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+              {stypeLabels['WORKING']} ({workingSites.length})
+            </h3>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd('WORKING')}
+            >
+              <SortableContext
+                items={workingSites.map((s) => s.sid)}
+                strategy={rectSortingStrategy}
+              >
+                {/* 모바일: 1열, 데스크탑: 2열 */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {workingSites.map((site) => (
+                    <SortableSiteCard
+                      key={site.sid}
+                      site={site}
+                      isFavorite={favoriteSites.includes(site.sid)}
+                      toggleFavorite={toggleFavoriteSite}
+                      getSiteSensorSummary={getSiteSensorSummary}
+                      getAverage={getAverage}
+                      controllerGateways={controllerGateways}
+                      setSelectedSite={setSelectedSite}
+                      onOpenCamera={onOpenCamera}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+        )}
+
+        {/* GERMINATION */}
+        {germinationSites.length > 0 && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+              <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+              {stypeLabels['GERMINATION']} ({germinationSites.length})
+            </h3>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd('GERMINATION')}
+            >
+              <SortableContext
+                items={germinationSites.map((s) => s.sid)}
+                strategy={rectSortingStrategy}
+              >
+                {/* 모바일: 1열, 데스크탑: 2열 */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {germinationSites.map((site) => (
+                    <SortableSiteCard
+                      key={site.sid}
+                      site={site}
+                      isFavorite={favoriteSites.includes(site.sid)}
+                      toggleFavorite={toggleFavoriteSite}
+                      getSiteSensorSummary={getSiteSensorSummary}
+                      getAverage={getAverage}
+                      controllerGateways={controllerGateways}
+                      setSelectedSite={setSelectedSite}
+                      onOpenCamera={onOpenCamera}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+        )}
+      </div>
+      </div>
     </div>
   );
 }

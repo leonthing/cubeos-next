@@ -669,8 +669,8 @@ export default function DashboardPage() {
                       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                         GROWING
                       </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                        {sitesByType['GROWING'].map((site) => renderSiteCard(site, true))}
+                      <div className="grid grid-cols-2 gap-2">
+                        {sitesByType['GROWING'].map((site) => renderSiteCard(site))}
                       </div>
                     </div>
                   )}

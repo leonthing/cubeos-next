@@ -1,0 +1,24 @@
+{
+  "name": "cubeOS - 스마트팜 모니터링 시스템",
+  "short_name": "cubeOS",
+  "description": "모듈형 수직농장 모니터링 및 운영 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#16a34a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
